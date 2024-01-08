@@ -1,0 +1,11 @@
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E018] Syntax Error: C:\Users\Arnav\Documents\GitHub\apl\apl\index.scala:20:38 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m20 |[0m        [33mcase[0m x~[31m"="[0m~f => { x.v = f.v x }[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                                      ^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                                      expression expected but [31m'}'[0m found[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\index.scala:20:36 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m20 |[0m        [33mcase[0m x~[31m"="[0m~f => { x.v = f.v x }[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                                ^^^^^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                                value x is not a member of Double[0m
+[0m[[0m[31merror[0m] [0m[0mtwo errors found[0m

@@ -1,0 +1,15 @@
+[0m[[0m[0mdebug[0m] [0m[0mPackaging C:\Users\Arnav\Documents\GitHub\apl\apl\target\scala-3.3.1\apl_3-0.1.0-SNAPSHOT.jar ...[0m
+[0m[[0m[0mdebug[0m] [0m[0mInput file mappings:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	utility[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\Users\Arnav\Documents\GitHub\apl\apl\target\scala-3.3.1\classes\utility[0m
+[0m[[0m[0mdebug[0m] [0m[0m	utility\DoubleObj.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\Users\Arnav\Documents\GitHub\apl\apl\target\scala-3.3.1\classes\utility\DoubleObj.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	utility\DoubleObj.tasty[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\Users\Arnav\Documents\GitHub\apl\apl\target\scala-3.3.1\classes\utility\DoubleObj.tasty[0m
+[0m[[0m[0mdebug[0m] [0m[0m	utility\ParserFormula$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\Users\Arnav\Documents\GitHub\apl\apl\target\scala-3.3.1\classes\utility\ParserFormula$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	utility\ParserFormula.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\Users\Arnav\Documents\GitHub\apl\apl\target\scala-3.3.1\classes\utility\ParserFormula.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	utility\ParserFormula.tasty[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  C:\Users\Arnav\Documents\GitHub\apl\apl\target\scala-3.3.1\classes\utility\ParserFormula.tasty[0m
+[0m[[0m[0mdebug[0m] [0m[0mDone packaging.[0m
