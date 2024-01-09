@@ -1,0 +1,41 @@
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(run, Some(963e9e23-b056-4677-9f4f-52acc9efa0e5), Some(CommandSource(console0)))[0m
+[0m[[0m[0mdebug[0m] [0m[0mEvaluating tasks: Compile / run[0m
+[0m[[0m[0mdebug[0m] [0m[0mRunning task... Cancel: Signal, check cycles: false, forcegc: true[0m
+[0m[[0m[0minfo[0m] [0m[0mcompiling 3 Scala sources to C:\Users\Arnav\Documents\GitHub\apl\apl\target\scala-3.3.1\classes ...[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m-- Warning: C:\Users\Arnav\Documents\GitHub\apl\apl\line.scala:17:27 -----------[0m[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m17 |[0m                [33mcase[0m (x, f): (Wrapper[Double], Wrapper[Double]) => {[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m   |[0m                           ^[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mType ascriptions after patterns other than:[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * variable pattern, e.g. `case x: String =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * number literal pattern, e.g. `case 10.5: Double =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mare no longer supported. Remove the type ascription or move it to a separate variable pattern.[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m-- Warning: C:\Users\Arnav\Documents\GitHub\apl\apl\line.scala:34:30 -----------[0m[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m34 |[0m                [33mcase[0m (t1, lst): (Wrapper[Double], List[(String, Wrapper[Double])]) => {[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m   |[0m                              ^[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mType ascriptions after patterns other than:[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * variable pattern, e.g. `case x: String =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * number literal pattern, e.g. `case 10.5: Double =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mare no longer supported. Remove the type ascription or move it to a separate variable pattern.[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m-- Warning: C:\Users\Arnav\Documents\GitHub\apl\apl\line.scala:49:30 -----------[0m[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m49 |[0m                [33mcase[0m (f1, lst): (Wrapper[Double], List[(String, Wrapper[Double])]) => {[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m   |[0m                              ^[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mType ascriptions after patterns other than:[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * variable pattern, e.g. `case x: String =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * number literal pattern, e.g. `case 10.5: Double =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mare no longer supported. Remove the type ascription or move it to a separate variable pattern.[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m-- [E121] Pattern Match Warning: C:\Users\Arnav\Documents\GitHub\apl\apl\line.scala:44:13 [0m[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m44 |[0m        [33mcase[0m default => Wrapper([31m0.0[0m)[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m   |[0m             ^^^^^^^[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mUnreachable case except for [31mnull[0m (if this is intentional, consider writing [33mcase[0m [31mnull[0m => instead).[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m-- [E029] Pattern Match Exhaustivity Warning: C:\Users\Arnav\Documents\GitHub\apl\apl\line.scala:48:12 [0m[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m48 |[0m            (f1, lst) [33mmatch[0m {[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m   |[0m            ^^^^^^^^^[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m            [33mmatch[0m may not be exhaustive.[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m            It would fail on pattern case: (_, _)[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m longer explanation available when compiling with `-explain`[0m
+[0m[[0m[33mwarn[0m] [0m[0m5 warnings found[0m
+[0m[[0m[0mdebug[0m] [0m[0mForcing garbage collection...[0m
+[0m[[0m[32msuccess[0m] [0m[0mTotal time: 0 s, completed Jan 8, 2024, 11:21:14 PM[0m
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(shell, None, None)[0m

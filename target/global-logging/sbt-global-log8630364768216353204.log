@@ -1,0 +1,28 @@
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(run, Some(bbc4ce2f-2140-41fa-8926-2aeb86e28b24), Some(CommandSource(console0)))[0m
+[0m[[0m[0mdebug[0m] [0m[0mEvaluating tasks: Compile / run[0m
+[0m[[0m[0mdebug[0m] [0m[0mRunning task... Cancel: Signal, check cycles: false, forcegc: true[0m
+[0m[[0m[0minfo[0m] [0m[0mcompiling 3 Scala sources to C:\Users\Arnav\Documents\GitHub\apl\apl\target\scala-3.3.1\classes ...[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E040] Syntax Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:37:8 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m37 |[0m        }[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m        ^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m        '=>' expected, but '}' found[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E007] Type Mismatch Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:36:13 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m36 |[0m            }[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m             ^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m             Found:    Unit[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m             Required: util.Data[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E119] Type Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:13:31 -[0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m13 |[0m    [33mprivate[0m [33mvar[0m _t: DataType = Number,[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                               ^^^^^^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                               Java defined [33mclass[0m [35mNumber[0m is not a value[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:14:40 -------------[0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m14 |[0m    [33mprivate[0m [33mvar[0m _v: AnyRef = [33mnew[0m Double([31m0.0[0m)[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                                        ^^^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m   too many arguments for [33mconstructor[0m [35mDouble[0m in [33mclass[0m [35mDouble[0m: (): Double[0m
+[0m[[0m[31merror[0m] [0m[0mfour errors found[0m
+[0m[[0m[31merror[0m] [0m[0m(Compile / [31mcompileIncremental[0m) Compilation failed[0m
+[0m[[0m[31merror[0m] [0m[0mTotal time: 0 s, completed Jan 9, 2024, 9:53:14 AM[0m
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(shell, None, None)[0m
+[0m[[0m[0mdebug[0m] [0m[0mForcing garbage collection...[0m

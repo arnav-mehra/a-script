@@ -1,0 +1,29 @@
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(run, Some(ec776746-243d-4b60-b629-8816f0e448b6), Some(CommandSource(console0)))[0m
+[0m[[0m[0mdebug[0m] [0m[0mEvaluating tasks: Compile / run[0m
+[0m[[0m[0mdebug[0m] [0m[0mRunning task... Cancel: Signal, check cycles: false, forcegc: true[0m
+[0m[[0m[0minfo[0m] [0m[0mcompiling 1 Scala source to C:\Users\Arnav\Documents\GitHub\apl\apl\target\scala-3.3.1\classes ...[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m-- Warning: C:\Users\Arnav\Documents\GitHub\apl\apl\line.scala:17:27 -----------[0m[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m17 |[0m                [33mcase[0m (x, f): (Wrapper[Double], Wrapper[Double]) => {[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m   |[0m                           ^[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mType ascriptions after patterns other than:[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * variable pattern, e.g. `case x: String =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * number literal pattern, e.g. `case 10.5: Double =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mare no longer supported. Remove the type ascription or move it to a separate variable pattern.[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m-- Warning: C:\Users\Arnav\Documents\GitHub\apl\apl\line.scala:34:30 -----------[0m[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m34 |[0m                [33mcase[0m (t1, lst): (Wrapper[Double], List[(String, Wrapper[Double])]) => {[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m   |[0m                              ^[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mType ascriptions after patterns other than:[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * variable pattern, e.g. `case x: String =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * number literal pattern, e.g. `case 10.5: Double =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mare no longer supported. Remove the type ascription or move it to a separate variable pattern.[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m-- Warning: C:\Users\Arnav\Documents\GitHub\apl\apl\line.scala:48:30 -----------[0m[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m48 |[0m                [33mcase[0m (f1, lst): (Wrapper[Double], List[(String, Wrapper[Double])]) => {[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m   |[0m                              ^[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mType ascriptions after patterns other than:[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * variable pattern, e.g. `case x: String =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0m  * number literal pattern, e.g. `case 10.5: Double =>`[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m   |[0mare no longer supported. Remove the type ascription or move it to a separate variable pattern.[0m
+[0m[[0m[33mwarn[0m] [0m[0mthree warnings found[0m
+[0m[[0m[32msuccess[0m] [0m[0mTotal time: 0 s, completed Jan 8, 2024, 11:22:02 PM[0m
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(shell, None, None)[0m
+[0m[[0m[0mdebug[0m] [0m[0mForcing garbage collection...[0m
