@@ -1,6 +1,6 @@
 package util
 
-import java.lang.Double as JavaDouble
+import scala.collection.mutable.HashMap
 
 enum DataType {
     case Number,
@@ -9,31 +9,19 @@ enum DataType {
          Array
 }
 
+type NumberType = Double 
+type StringType = String
+type ArrayType = List[Data]
+type ObjectType = HashMap[Data, Data]
+
 class Data(
     private var _t: DataType = DataType.Number,
-    private var _v: AnyRef = new Double(0.0).asInstanceOf[AnyRef]
+    private var _v: AnyRef = (0.0).asInstanceOf[AnyRef]
 ) {
-    def this(x: Any) = {
-        val ref = x.asInstanceOf(AnyRef)
-        x match {
-            case Double => {
-                this(DataType.Number, ref)
-            }
-            case String => {
-                this(DataType.String, ref)
-            }
-            case List[Data] => {
-                this(DataType.Array, ref)
-            }
-            case HashMap[Data, Data] => {
-                this(DataType.Object, ref)
-            }
-            case default => {
-                println("wtf, u done did it now")
-                this()
-            }
-        }
-    }
+    def this(x: NumberType) = this(DataType.Number, x.asInstanceOf[AnyRef])
+    def this(x: StringType) = this(DataType.String, x.asInstanceOf[AnyRef])
+    def this(x: ArrayType)  = this(DataType.Array,  x.asInstanceOf[AnyRef])
+    def this(x: ObjectType) = this(DataType.Object, x.asInstanceOf[AnyRef])
 
     def t = _t
     def t_=(t: DataType) = {
@@ -45,7 +33,7 @@ class Data(
         _v = v
     }
 
-    def get_tv(): Unit = {
+    def get_tv(): NumberType | StringType | ArrayType | ObjectType = {
         t match {
             case DataType.Number => {
                 v.asInstanceOf[Double]
@@ -56,24 +44,24 @@ class Data(
             case DataType.Array => {
                 v.asInstanceOf[List[Data]]
             }
-            case DataType.Object => {
-                v.asInstanceOf[Object[Data, Data]]
+            case ObjectType => {
+                v.asInstanceOf[HashMap[Data, Data]]
             }
         }
     }
 
-    def +=(op: Data) = {
+    def +=(op2: Data) = {
         val v1 = get_tv()
         val v2 = op2.get_tv()
 
-        (t, op2.t) match {
-            case (DataType.Object, DataType.Array) => {
+        (v1, v2) match {
+            case (ObjectType, ArrayType) => {
                 v1 += (v2(0), v2(1))
             }
-            case (DataType.String, DataType.String)
-               | (DataType.Number, DataType.Number)
-               | (DataType.Object, DataType.Object)
-               | (DataType.Array, DataType.Array) => {
+            case (StringType, StringType)
+               | (NumberType, NumberType)
+               | (ObjectType, ObjectType)
+               | (ArrayType, ArrayType) => {
                 v1 += v2
             }
         }
@@ -87,15 +75,15 @@ class Data(
         val v2 = op2.get_tv()
 
         (t, op2.t) match {
-            case (DataType.Number, DataType.Number)
-               | (DataType.String, DataType.String) => {
+            case (NumberType, NumberType)
+               | (StringType, StringType) => {
                 new Data(v1 + v2)
             }
-            case (DataType.Array, DataType.Array) 
-               | (DataType.Object, DataType.Object) => {
+            case (ArrayType, ArrayType) 
+               | (ObjectType, ObjectType) => {
                 new Data(v1 ++ v2)
             }
-            case (DataType.Array, _) => {
+            case (ArrayType, _) => {
                 val v3 = v1.map(x => {
                     if (x.t == op2.t) {
                         x + op2
@@ -105,10 +93,10 @@ class Data(
                 })
                 new Data(v3)
             }
-            case (DataType.String, _) => {
+            case (StringType, _) => {
                 new Data(v1 + v2.toString())
             }
-            case (_, DataType.String) => {
+            case (_, StringType) => {
                 new Data(v1.toString() + v2)
             }
             case default => {
@@ -123,9 +111,9 @@ class Data(
         val v2 = op2.get_tv()
 
         (t, op2.t) match {
-            case (DataType.Number, DataType.Number)
-               | (DataType.String, DataType.String)
-               | (DataType.Object, _) => {
+            case (NumberType, NumberType)
+               | (StringType, StringType)
+               | (ObjectType, _) => {
                 new Data(v1 - v2)
             }
             case default => {
@@ -139,7 +127,7 @@ class Data(
         val v1 = get_tv()
 
         t match {
-            case DataType.Number => {
+            case NumberType => {
                 new Data(v1 + 1)
             }
             case default => {
@@ -153,7 +141,7 @@ class Data(
         val v1 = get_tv()
 
         t match {
-            case DataType.Number => {
+            case NumberType => {
                 new Data(v1 - 1)
             }
             case default => {
@@ -168,7 +156,7 @@ class Data(
         val v2 = op2.get_tv()
 
         (t, op2.t) match {
-            case (DataType.Number) => {
+            case (NumberType) => {
                 new Data(v1 * v2)
             }
             case default => {
@@ -183,7 +171,7 @@ class Data(
         val v2 = op2.get_tv()
 
         (t, op2.t) match {
-            case (DataType.Number) => {
+            case (NumberType) => {
                 new Data(v1 / v2)
             }
             case default => {

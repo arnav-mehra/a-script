@@ -1,99 +1,40 @@
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E040] Syntax Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:17:8 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m17 |[0m        [33mval[0m [36mref[0m = x.asInstanceOf(AnyRef)[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m        ^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m        'this' expected, but 'val' found[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:14:40 -----------[0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m14 |[0m    [33mprivate[0m [33mvar[0m _v: AnyRef = [33mnew[0m Double([31m0.0[0m).asInstanceOf[AnyRef][0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                                        ^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m   too many arguments for [33mconstructor[0m [35mDouble[0m in [33mclass[0m [35mDouble[0m: (): Double[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E050] Type Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:20:16 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m20 |[0m                [33mthis[0m(DataType.Number, ref)[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                [33mclass[0m [35mData[0m in [33mpackage[0m [35mutil[0m does not take parameters[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E119] Type Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:20:38 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m20 |[0m                [33mthis[0m(DataType.Number, ref)[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                                      ^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                                      [33mpackage[0m [35mscala.ref[0m is not a value[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E119] Type Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:22:17 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m22 |[0m            [33mcase[0m String => {[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                 ^^^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                 Java defined [33mclass[0m [35mString[0m is not a value[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E050] Type Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:23:16 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m23 |[0m                [33mthis[0m(DataType.String, ref)[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                [33mclass[0m [35mData[0m in [33mpackage[0m [35mutil[0m does not take parameters[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E119] Type Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:23:38 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m23 |[0m                [33mthis[0m(DataType.String, ref)[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                                      ^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                                      [33mpackage[0m [35mscala.ref[0m is not a value[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:25:21 -----------[0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m25 |[0m            [33mcase[0m List[Data] => {[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                 ^^^^^^^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                 invalid pattern[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E050] Type Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:26:16 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m26 |[0m                [33mthis[0m(DataType.Array, ref)[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                [33mclass[0m [35mData[0m in [33mpackage[0m [35mutil[0m does not take parameters[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E119] Type Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:26:37 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m26 |[0m                [33mthis[0m(DataType.Array, ref)[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                                     ^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                                     [33mpackage[0m [35mscala.ref[0m is not a value[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:28:24 -----------[0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m28 |[0m            [33mcase[0m HashMap[Data, Data] => {[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                 ^^^^^^^^^^^^^^^^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                 invalid pattern[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E050] Type Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:29:16 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m29 |[0m                [33mthis[0m(DataType.Object, ref)[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                [33mclass[0m [35mData[0m in [33mpackage[0m [35mutil[0m does not take parameters[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E119] Type Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:29:38 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m29 |[0m                [33mthis[0m(DataType.Object, ref)[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                                      ^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                                      [33mpackage[0m [35mscala.ref[0m is not a value[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E050] Type Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:33:16 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m33 |[0m                [33mthis[0m()[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                [33mclass[0m [35mData[0m in [33mpackage[0m [35mutil[0m does not take parameters[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E053] Type Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:60:31 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m60 |[0m                v.asInstanceOf[[35mObject[0m[[35mData[0m, [35mData[0m]][0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                               ^^^^^^^^^^^^^^^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                               Object does not take type parameters[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E006] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:67:17 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m67 |[0m        [33mval[0m [36mv2[0m = op2.get_tv()[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                 ^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                 Not found: op2[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E006] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:69:12 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m69 |[0m        (t, op2.t) [33mmatch[0m {[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m            ^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m            Not found: op2[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:71:19 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m71 |[0m                v1 += (v2([31m0[0m), v2([31m1[0m))[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E140] Cyclic Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:14:9 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m14 |[0m    [33mtype[0m [35mString[0m = [35mString[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m         ^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0millegal cyclic type reference: alias util.TrueType.String of ... (caught cyclic reference) ... refers back to the type itself[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:61:19 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m61 |[0m                v1 += (v2([31m0[0m), v2([31m1[0m))[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                ^^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                value += is not a member of Unit - did you mean v1.!=?[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:77:19 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m77 |[0m                v1 += v2[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0mvalue += is not a member of Double | String | List[util.Data] |[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m  collection.mutable.HashMap[util.Data, util.Data] - did you mean v1.!=?[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E050] Type Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:61:23 -[0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m61 |[0m                v1 += (v2([31m0[0m), v2([31m1[0m))[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                       ^^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                       [33mvalue[0m [35mv2[0m does not take parameters[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E050] Type Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:61:30 -[0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m61 |[0m                v1 += (v2([31m0[0m), v2([31m1[0m))[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                              ^^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                              [33mvalue[0m [35mv2[0m does not take parameters[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:67:19 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m67 |[0m                v1 += v2[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                ^^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                value += is not a member of Unit - did you mean v1.!=?[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:92:28 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m92 |[0m                [33mnew[0m [35mData[0m(v1 + v2)[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0mvalue += is not a member of Double | String | List[util.Data] |[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m  collection.mutable.HashMap[util.Data, util.Data] - did you mean v1.!=?[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E006] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:70:23 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m70 |[0m        [33mval[0m [36mn[0m = [33mthis[0m + op[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                       ^^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                       Not found: op[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m longer explanation available when compiling with `-explain`[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:82:28 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m82 |[0m                [33mnew[0m [35mData[0m(v1 + v2)[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                         ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0mvalue + is not a member of Unit, but could be made available as an extension method.[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0mvalue + is not a member of Double | String | List[util.Data] |[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m  collection.mutable.HashMap[util.Data, util.Data], but could be made available as an extension method.[0m
 [0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
 [0m[[0m[31merror[0m] [0m[0m[31m   |[0mOne of the following imports might make progress towards fixing the problem:[0m
 [0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
@@ -101,18 +42,43 @@
 [0m[[0m[31merror[0m] [0m[0m[31m   |[0m  import math.Integral.Implicits.infixIntegralOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m   |[0m  import math.Numeric.Implicits.infixNumericOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:96:28 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m96 |[0m                [33mnew[0m [35mData[0m(v1 ++ v2)[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:86:28 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m86 |[0m                [33mnew[0m [35mData[0m(v1 ++ v2)[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                         ^^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                         value ++ is not a member of Unit[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:99:28 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m99 |[0m                [33mval[0m [36mv3[0m = v1.map([36mx[0m => {[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m         value ++ is not a member of Double | String | List[util.Data] |[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m           collection.mutable.HashMap[util.Data, util.Data][0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:89:28 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m89 |[0m                [33mval[0m [36mv3[0m = v1.map([36mx[0m => {[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                         ^^^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m   |[0m                         value map is not a member of Unit[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:109:28 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m109 |[0m                [33mnew[0m [35mData[0m(v1 + v2.toString())[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m        value map is not a member of Double | String | List[util.Data] |[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m          collection.mutable.HashMap[util.Data, util.Data][0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:99:28 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m99 |[0m                [33mnew[0m [35mData[0m(v1 + v2.toString())[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m   |[0m                         ^^^^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0mvalue + is not a member of Double | String | List[util.Data] |[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m  collection.mutable.HashMap[util.Data, util.Data], but could be made available as an extension method.[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0mOne of the following imports might make progress towards fixing the problem:[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m  import math.Fractional.Implicits.infixFractionalOps[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m  import math.Integral.Implicits.infixIntegralOps[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m  import math.Numeric.Implicits.infixNumericOps[0m
+[0m[[0m[31merror[0m] [0m[0m[31m   |[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E134] Type Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:102:20 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m102 |[0m                [33mnew[0m [35mData[0m(v1.toString() + v2)[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m    |[0m                    ^^^^[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0mNone of the overloaded alternatives of [33mconstructor[0m [35mData[0m in [33mclass[0m [35mData[0m with types[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0m (x: util.TrueType.Object): util.Data[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0m (x: util.TrueType.Array): util.Data[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0m (x: util.TrueType.String): util.Data[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0m (x: util.TrueType.Number): util.Data[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0m (_t: util.DataType, _v: AnyRef): util.Data[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0mmatch arguments (String)[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:119:28 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m119 |[0m                [33mnew[0m [35mData[0m(v1 - v2)[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m    |[0m                         ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0mvalue + is not a member of Unit, but could be made available as an extension method.[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0mvalue - is not a member of Double | String | List[util.Data] |[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0m  collection.mutable.HashMap[util.Data, util.Data], but could be made available as an extension method.[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0mOne of the following imports might make progress towards fixing the problem:[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
@@ -120,10 +86,11 @@
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Integral.Implicits.infixIntegralOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Numeric.Implicits.infixNumericOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:129:28 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m129 |[0m                [33mnew[0m [35mData[0m(v1 - v2)[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:133:28 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m133 |[0m                [33mnew[0m [35mData[0m(v1 + [31m1[0m)[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m    |[0m                         ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0mvalue - is not a member of Unit, but could be made available as an extension method.[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0mvalue + is not a member of Double | String | List[util.Data] |[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0m  collection.mutable.HashMap[util.Data, util.Data], but could be made available as an extension method.[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0mOne of the following imports might make progress towards fixing the problem:[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
@@ -131,10 +98,11 @@
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Integral.Implicits.infixIntegralOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Numeric.Implicits.infixNumericOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:143:28 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m143 |[0m                [33mnew[0m [35mData[0m(v1 + [31m1[0m)[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:147:28 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m147 |[0m                [33mnew[0m [35mData[0m(v1 - [31m1[0m)[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m    |[0m                         ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0mvalue + is not a member of Unit, but could be made available as an extension method.[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0mvalue - is not a member of Double | String | List[util.Data] |[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0m  collection.mutable.HashMap[util.Data, util.Data], but could be made available as an extension method.[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0mOne of the following imports might make progress towards fixing the problem:[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
@@ -142,29 +110,19 @@
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Integral.Implicits.infixIntegralOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Numeric.Implicits.infixNumericOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:157:28 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m157 |[0m                [33mnew[0m [35mData[0m(v1 - [31m1[0m)[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m    |[0m                         ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0mvalue - is not a member of Unit, but could be made available as an extension method.[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0mOne of the following imports might make progress towards fixing the problem:[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Fractional.Implicits.infixFractionalOps[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Integral.Implicits.infixIntegralOps[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Numeric.Implicits.infixNumericOps[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E007] Type Mismatch Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:171:27 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m171 |[0m            [33mcase[0m (DataType.Number) => {[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E007] Type Mismatch Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:161:27 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m161 |[0m            [33mcase[0m (DataType.Number) => {[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m    |[0m                  ^^^^^^^^^^^^^^^[0m[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m                  Found:    (util.DataType[1m[31m.[0m[1m[31mNumber[0m [1m[31m:[0m[1m[31m [0mutil.DataType)[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m                  Required: (util.DataType[1m[32m,[0m util.DataType)[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m                  pattern type is incompatible with expected type[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m longer explanation available when compiling with `-explain`[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:172:28 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m172 |[0m                [33mnew[0m [35mData[0m(v1 * v2)[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:162:28 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m162 |[0m                [33mnew[0m [35mData[0m(v1 * v2)[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m    |[0m                         ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0mvalue * is not a member of Unit, but could be made available as an extension method.[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0mvalue * is not a member of Double | String | List[util.Data] |[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0m  collection.mutable.HashMap[util.Data, util.Data], but could be made available as an extension method.[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0mOne of the following imports might make progress towards fixing the problem:[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
@@ -172,22 +130,23 @@
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Integral.Implicits.infixIntegralOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Numeric.Implicits.infixNumericOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E007] Type Mismatch Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:186:27 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m186 |[0m            [33mcase[0m (DataType.Number) => {[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E007] Type Mismatch Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:176:27 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m176 |[0m            [33mcase[0m (DataType.Number) => {[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m    |[0m                  ^^^^^^^^^^^^^^^[0m[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m                  Found:    (util.DataType[1m[31m.[0m[1m[31mNumber[0m [1m[31m:[0m[1m[31m [0mutil.DataType)[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m                  Required: (util.DataType[1m[32m,[0m util.DataType)[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m                  pattern type is incompatible with expected type[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m longer explanation available when compiling with `-explain`[0m
-[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\mehra\Documents\GitHub\nando\apl\util.scala:187:28 [0m[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m187 |[0m                [33mnew[0m [35mData[0m(v1 / v2)[0m
+[0m[[0m[31merror[0m] [0m[0m[31m[31m-- [E008] Not Found Error: C:\Users\Arnav\Documents\GitHub\apl\apl\util.scala:177:28 [0m[0m[0m
+[0m[[0m[31merror[0m] [0m[0m[31m177 |[0m                [33mnew[0m [35mData[0m(v1 / v2)[0m
 [0m[[0m[31merror[0m] [0m[0m[31m[31m    |[0m                         ^^^^[0m[0m
-[0m[[0m[31merror[0m] [0m[0m[31m    |[0mvalue / is not a member of Unit, but could be made available as an extension method.[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0mvalue / is not a member of Double | String | List[util.Data] |[0m
+[0m[[0m[31merror[0m] [0m[0m[31m    |[0m  collection.mutable.HashMap[util.Data, util.Data], but could be made available as an extension method.[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0mOne of the following imports might make progress towards fixing the problem:[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Fractional.Implicits.infixFractionalOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m  import math.Integral.Implicits.infixIntegralOps[0m
 [0m[[0m[31merror[0m] [0m[0m[31m    |[0m[0m
-[0m[[0m[31merror[0m] [0m[0m30 errors found[0m
+[0m[[0m[31merror[0m] [0m[0m18 errors found[0m
