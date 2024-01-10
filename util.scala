@@ -2,184 +2,118 @@ package util
 
 import scala.collection.mutable.HashMap
 
-enum DataType {
-    case Number,
-         String,
-         Object,
-         Array
-}
+abstract class Data {
+    case class Number(v: Double) extends Data
+    case class String(v: String) extends Data
+    case class Array(v: List[Data]) extends Data
+    case class Object(v: HashMap[Data, Data]) extends Data
 
-type NumberType = Double 
-type StringType = String
-type ArrayType = List[Data]
-type ObjectType = HashMap[Data, Data]
-
-class Data(
-    private var _t: DataType = DataType.Number,
-    private var _v: AnyRef = (0.0).asInstanceOf[AnyRef]
-) {
-    def this(x: NumberType) = this(DataType.Number, x.asInstanceOf[AnyRef])
-    def this(x: StringType) = this(DataType.String, x.asInstanceOf[AnyRef])
-    def this(x: ArrayType)  = this(DataType.Array,  x.asInstanceOf[AnyRef])
-    def this(x: ObjectType) = this(DataType.Object, x.asInstanceOf[AnyRef])
-
-    def t = _t
-    def t_=(t: DataType) = {
-        _t = t
-    }
-
-    def v = _v
-    def v_=(v: AnyRef) = {
-        _v = v
-    }
-
-    def get_tv(): NumberType | StringType | ArrayType | ObjectType = {
-        t match {
-            case DataType.Number => {
-                v.asInstanceOf[Double]
-            }
-            case DataType.String => {
-                v.asInstanceOf[String]
-            }
-            case DataType.Array => {
-                v.asInstanceOf[List[Data]]
-            }
-            case ObjectType => {
-                v.asInstanceOf[HashMap[Data, Data]]
-            }
+    def +=(op2: Data): Unit = {
+        (this, op2) match {
+            case (Object(v1), Array(v2) ) => v1 += v2(0) -> v2(1)
+            case (String(v1), String(v2)) => v1 += v2
+            case (Number(v1), Number(v2)) => this.Number(v1 + v2)
+            case (Array(v1),  Array(v2) ) => v1 :++ v2
+            case (Object(v1), Object(v2)) => v1 ++= v2
         }
-    }
-
-    def +=(op2: Data) = {
-        val v1 = get_tv()
-        val v2 = op2.get_tv()
-
-        (v1, v2) match {
-            case (ObjectType, ArrayType) => {
-                v1 += (v2(0), v2(1))
-            }
-            case (StringType, StringType)
-               | (NumberType, NumberType)
-               | (ObjectType, ObjectType)
-               | (ArrayType, ArrayType) => {
-                v1 += v2
-            }
-        }
-        val n = this + op
-        v = n.v
-        t = n.t
     }
 
     def +(op2: Data): Data = {
-        val v1 = get_tv()
-        val v2 = op2.get_tv()
+        (this, op2) match {
+            case (Number(v1), Number(v2)) => new this.Number(v1 + v2)
+            case (String(v1), String(v2)) => new this.String(v1 + v2)
+            case (Array(v1),  Array(v2) ) => new this.Array(v1 ++ v2)
+            case (Object(v1), Object(v2)) => new this.Object(v1 ++ v2)
+            
+            case (Number(v1), String(v2)) => new this.String(v1.toString() + v2)
+            case (Object(v1), String(v2)) => new this.String(v1.toString() + v2)
+            case (Array(v1), String(v2)) => new this.String(v1.toString() + v2)
+            
+            case (String(v1), Number(v2)) => new this.String(v1 + v2.toString())
+            case (String(v1), Object(v2)) => new this.String(v1 + v2.toString())
+            case (String(v1), Array(v2)) => new this.String(v1 + v2.toString())
 
-        (t, op2.t) match {
-            case (NumberType, NumberType)
-               | (StringType, StringType) => {
-                new Data(v1 + v2)
-            }
-            case (ArrayType, ArrayType) 
-               | (ObjectType, ObjectType) => {
-                new Data(v1 ++ v2)
-            }
-            case (ArrayType, _) => {
-                val v3 = v1.map(x => {
-                    if (x.t == op2.t) {
-                        x + op2
-                    } else {
-                        x
-                    }
-                })
-                new Data(v3)
-            }
-            case (StringType, _) => {
-                new Data(v1 + v2.toString())
-            }
-            case (_, StringType) => {
-                new Data(v1.toString() + v2)
-            }
             case default => {
                 println("this aint a + op")
-                new Data()
+                new Data.Number(0.0)
             }
         }
     }
 
-    def -(op2: Data): Data = {
-        val v1 = get_tv()
-        val v2 = op2.get_tv()
+    // def -(op2: Data): Data = {
+    //     val v1 = get_tv()
+    //     val v2 = op2.get_tv()
 
-        (t, op2.t) match {
-            case (NumberType, NumberType)
-               | (StringType, StringType)
-               | (ObjectType, _) => {
-                new Data(v1 - v2)
-            }
-            case default => {
-                println("this aint a + op")
-                new Data()
-            }
-        }
-    }
+    //     (t, op2.t) match {
+    //         case (NumberType, NumberType)
+    //            | (StringType, StringType)
+    //            | (ObjectType, _) => {
+    //             new Data(v1 - v2)
+    //         }
+    //         case default => {
+    //             println("this aint a + op")
+    //             new Data()
+    //         }
+    //     }
+    // }
 
-    def ++(): Data = {
-        val v1 = get_tv()
+    // def ++(): Data = {
+    //     val v1 = get_tv()
 
-        t match {
-            case NumberType => {
-                new Data(v1 + 1)
-            }
-            case default => {
-                println("this aint a + op")
-                new Data()
-            }
-        }
-    }
+    //     t match {
+    //         case NumberType => {
+    //             new Data(v1 + 1)
+    //         }
+    //         case default => {
+    //             println("this aint a + op")
+    //             new Data()
+    //         }
+    //     }
+    // }
 
-    def --(): Data = {
-        val v1 = get_tv()
+    // def --(): Data = {
+    //     val v1 = get_tv()
 
-        t match {
-            case NumberType => {
-                new Data(v1 - 1)
-            }
-            case default => {
-                println("this aint a + op")
-                new Data()
-            }
-        }
-    }
+    //     t match {
+    //         case NumberType => {
+    //             new Data(v1 - 1)
+    //         }
+    //         case default => {
+    //             println("this aint a + op")
+    //             new Data()
+    //         }
+    //     }
+    // }
 
-    def *(op2: Data): Data = {
-        val v1 = get_tv()
-        val v2 = op2.get_tv()
+    // def *(op2: Data): Data = {
+    //     val v1 = get_tv()
+    //     val v2 = op2.get_tv()
 
-        (t, op2.t) match {
-            case (NumberType) => {
-                new Data(v1 * v2)
-            }
-            case default => {
-                println("this aint a + op")
-                new Data()
-            }
-        }
-    }
+    //     (t, op2.t) match {
+    //         case (NumberType) => {
+    //             new Data(v1 * v2)
+    //         }
+    //         case default => {
+    //             println("this aint a + op")
+    //             new Data()
+    //         }
+    //     }
+    // }
 
-    def /(op2: Data): Data = {
-        val v1 = get_tv()
-        val v2 = op2.get_tv()
+    // def /(op2: Data): Data = {
+    //     val v1 = get_tv()
+    //     val v2 = op2.get_tv()
 
-        (t, op2.t) match {
-            case (NumberType) => {
-                new Data(v1 / v2)
-            }
-            case default => {
-                println("this aint a + op")
-                new Data()
-            }
-        }
-    }
+    //     (t, op2.t) match {
+    //         case (NumberType) => {
+    //             new Data(v1 / v2)
+    //         }
+    //         case default => {
+    //             println("this aint a + op")
+    //             new Data()
+    //         }
+    //     }
+    // }
 }
 
 enum BlockType {
