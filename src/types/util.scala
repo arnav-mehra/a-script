@@ -1,4 +1,4 @@
-package util
+package types.util
 
 import scala.collection.mutable.HashMap
 import java.lang.{String => SString}

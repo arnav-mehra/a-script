@@ -1,14 +1,17 @@
-package line
+package parsers.line
 
 import scala.util.parsing.combinator.JavaTokenParsers
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 
-import util.{Data, BlockType}
-import index.ProgramParser
+import types.util.*
+import parsers.block.*
+import runner.Runner.{functions, variables, run_function}
 
 object LineParser extends JavaTokenParsers {
-    val variables : HashMap[String, Data] = HashMap();
+    def parse(ln: String): Data = {
+        parseAll(line, ln).get
+    }
 
     def line:Parser[Data] = setter | getter
 
@@ -88,7 +91,7 @@ object LineParser extends JavaTokenParsers {
 
     def caller: Parser[Data] = variable ~ "()" ^^ {
         case v~"()" => {
-            ProgramParser.run_function(v)
+            run_function(v)
         }
     }
 
@@ -116,34 +119,4 @@ object LineParser extends JavaTokenParsers {
                 Data.Array(ArrayBuffer())
             }
         }
-
-    // RUNNERS
-
-    def run(code: String) = {
-        code.replaceAll("\\s", "")
-            .split(";")
-            .filter(x => x.length() > 0)
-            .foreach(l => {
-                println(l)
-                val res = parseAll(line, l)
-                println(res.get)
-            })
-    }
-
-    // def main(args: Array[String]) = {
-    //     val code : String = """
-    //         x = 1;
-    //         y = 1;
-    //         x *= 2;
-    //         x *= 2;
-    //         x;
-    //     """
-
-    //     run(code)
-        
-    //     // 2+3*5 
-    //     // => term(2) [+ term(3*5)]
-    //     // => (factor(2), []) [+ (factor(3), [* factor(5)])]
-    //     // => (float(2), []) [+ (float(3), [* float(5)])]
-    // }
 }
