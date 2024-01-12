@@ -7,21 +7,13 @@ import runner.*
 
 object Index {
     def main(args: Array[String]) = {
-        // def main(args: Array[String]) = {
-        // val code : String = """
-        //     x = 10;
-        //     while x {
-        //         x -= 1;
-        //         if x == 5 {
-        //             x -= 1;
-        //         }
-        //     }
-        // """
-
-        val code : String = """
-            x = [];
-            x += 5;
-        """
+        if (args.length == 0) {
+            println("Please add a file to run")
+            System.exit(1)
+        }
+        val fname: String = args(0) + ".asc"
+        println(fname)
+        val code: String = scala.io.Source.fromFile(fname).mkString
         Runner.run(code)
     }
 }

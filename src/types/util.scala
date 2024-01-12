@@ -6,17 +6,43 @@ import scala.{Array => AArray}
 import scala.collection.mutable.ArrayBuffer
 
 enum Data {
-    case Number(v: Double) extends Data
-    case String(v: SString) extends Data
-    case Array (v: ArrayBuffer[Data]) extends Data
-    case Object(v: HashMap[Data, Data]) extends Data
+    case Number(v: Double)
+    case String(v: SString)
+    case Array (v: ArrayBuffer[Data])
+    case Object(v: HashMap[Data, Data])
+
+    // FIELD GETTERS & SETTERS
+
+    def ->(idx: Data): Data = {
+        (this, idx) match {
+            case (Array(v),  Number(i)) => v(i.toInt) 
+            case (String(v), Number(i)) => String(v.charAt(i.toInt).toString())
+            case (Object(v), _)         => v(idx)
+            case default => println("shit!"); this
+        }
+    }
+
+    def set(idx: Data, x: Data) = {
+        (this, idx, x) match {
+            case (Array(v), Number(i), _) => v(i.toInt) = x
+            // not possible until mut string type is used...
+            // case (String(v), Number(i), String(xs)) => { 
+            //     val sb = StringBuilder(v)
+            //     sb.replace(i.toInt, i.toInt + xs.length(), xs)
+            // }
+            case (Object(v), _, _)         => v(idx) = x
+            case default => println("shit!"); this
+        }
+    }
+
+    // MATH OPS
 
     def +=(op2: Data): Unit = {
         (this, op2) match {
             case (String(v1), String(v2)) => v1 ++: v2
             case (Array(v1),  Array(v2) ) => v1.appendAll(v2)
             case (Object(v1), Object(v2)) => v1 ++= v2
-            case (Object(v1), Array(v2) ) => v1 += v2(0) -> v2(1)
+            case (Object(v1), Array(v2) ) => v1(v2(0)) = v2(1)
             case (Array(v1),  _)          => v1.append(op2)
             case (String(v1), Number(v2)) => v1 ++: v2.toString()
             case default => println("shit!")
@@ -62,15 +88,36 @@ enum Data {
         }
     }
 
-    def ==(op2: Data): Data = {
-        if (this.equals(op2)) Data.Number(1) else Data.Number(0)
+    // COMPARISON
+
+    def ==(op2: Data): Data = _from_antibool(_equals(op2))
+    def !=(op2: Data): Data = _from_antibool(_equals(op2))
+    def  <(op2: Data): Data = _from_bool(_less_than(op2))
+    def >=(op2: Data): Data = _from_antibool(_less_than(op2))
+    def <=(op2: Data): Data = _from_bool(_less_than(op2) || _equals(op2))
+    def  >(op2: Data): Data = _from_antibool(_less_than(op2) || _equals(op2))
+
+    // HELPERS
+
+    def _from_bool(b: Boolean): Data = {
+        Data.Number(if (b) 1 else 0)
     }
 
-    def !=(op2: Data): Data = {
-        if (this.equals(op2)) Data.Number(0) else Data.Number(1)
+    def _from_antibool(b: Boolean): Data = {
+        Data.Number(if (b) 0 else 1)
     }
 
-    def equals(op2: Data): Boolean = {
+    def _less_than(op2: Data): Boolean = {
+        (this, op2) match {
+            case (Number(v1), Number(v2)) => v1 < v2
+            case (String(v1), String(v2)) => v1 < v2
+            case (Array(v1),  Array(v2) ) => v1.length < v2.length
+            case (Object(v1), Object(v2)) => v1.size < v2.size
+            case default => println("shit!"); false
+        }
+    }
+
+    def _equals(op2: Data): Boolean = {
         (this, op2) match {
             case (Number(v1), Number(v2)) => v1 == v2
             case (String(v1), String(v2)) => v1 == v2
@@ -81,34 +128,19 @@ enum Data {
                 ((v1.keySet -- v2.keySet).size == 0)
                     && ((v2.keySet -- v1.keySet).size == 0)
             }
-            case default => false
+            case default => println("shit!"); false
         }
     }
 }
 
-enum BlockType {
-    case While,
-         If,
-         Fn,
-         Null
-}
 
 type BlockTree = ArrayBuffer[BlockNode | String]
 
-class BlockNode(
-    private var _bt: BlockType = BlockType.Null,
-    private var _cond: String = "",
-    private var _ls: BlockTree = ArrayBuffer()
-) {
-    def bt = _bt
-    def cond = _cond
-    def ls = _ls
+enum BlockNode {
+    case While(c: String, bt: BlockTree)
+    case If   (c: String, bt: BlockTree)
+    case ForTo(v: String, s: String, e: String, bt: BlockTree)
+    case ForIn(v: String, arr: String, bt: BlockTree)
+    case Fn   (v: String, bt: BlockTree)
+    case Null ()
 }
-
-// object Test {
-//     def main(args: AArray[SString]) = {
-//         val v1 = Data.Number(5)
-//         val v2 = Data.Number(4)
-//         print(v1 + v2)
-//     }
-// }
