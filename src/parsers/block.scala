@@ -9,7 +9,7 @@ import parsers.line.LineParser
 import runner.Runner.{functions, variables}
 
 object ProgramParser extends JavaTokenParsers {
-    def keywords = Array("if", "while", "for", "to", "in")
+    def keywords = Array("if", "while", "for", "to", "in", "fn")
     def kw_regexes = keywords.map(s => (
         "\\s" + s + "\\s", "~" + s + "~"
     ))
@@ -29,7 +29,11 @@ object ProgramParser extends JavaTokenParsers {
         parseAll(program, min_code).get
     }
 
-    def program:Parser[BlockTree] = rep(line | block) ^^ (lst => lst.to(ArrayBuffer))
+    def program:Parser[BlockTree] = rep(node) ^^ (
+        lst => lst.to(ArrayBuffer)
+    )
+
+    def node = line | block
 
     // BLOCKS
 
@@ -55,7 +59,7 @@ object ProgramParser extends JavaTokenParsers {
     }
 
     def for_block:Parser[BlockNode] =
-        "~for~" ~ (for_in_block|for_to_block)
+        "~for~" ~ (for_in_block | for_to_block)
     ^^ (s => s._2)
 
     def for_in_block:Parser[BlockNode] =
@@ -79,9 +83,13 @@ object ProgramParser extends JavaTokenParsers {
 
     // PRIMS
 
-    def line:Parser[String] = statement ~ ";" ^^ (s => s._1)
+    def line:Parser[AST] = statement ~ ";" ^^ (s => s._1)
 
-    def statement:Parser[String] = "[^;{}$~]*".r ^^ (s => s)
+    def statement:Parser[AST] = "[^;{}$~]+".r ^^ (s => {
+        LineParser.parse(s)
+    })
 
-    def variable:Parser[String] = "[a-zA-Z_][a-zA-Z_0-9]*".r ^^ (s => s)
+    def variable:Parser[String] = "[a-zA-Z_][a-zA-Z_0-9]*".r ^^ (s => {
+        variables(s) = Data.Number(0); s
+    })
 }

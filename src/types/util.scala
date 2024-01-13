@@ -131,16 +131,26 @@ enum Data {
             case default => println("shit!"); false
         }
     }
+
+    def _is_truthy = {
+        this match {
+            case Number(v) => v != 0
+            case Array(v)  => v.length != 0
+            case Object(v) => v.size != 0
+            case String(v) => v.length() != 0
+        }
+    }
 }
 
 
-type BlockTree = ArrayBuffer[BlockNode | String]
+type AST = (() => Data)
+type BlockTree = ArrayBuffer[BlockNode | AST]
 
 enum BlockNode {
-    case While(c: String, bt: BlockTree)
-    case If   (c: String, bt: BlockTree)
-    case ForTo(v: String, s: String, e: String, bt: BlockTree)
-    case ForIn(v: String, arr: String, bt: BlockTree)
+    case While(c: AST, bt: BlockTree)
+    case If   (c: AST, bt: BlockTree)
+    case ForTo(v: String, s: AST, e: AST, bt: BlockTree)
+    case ForIn(v: String, arr: AST, bt: BlockTree)
     case Fn   (v: String, bt: BlockTree)
     case Null ()
 }
