@@ -149,8 +149,8 @@ type BlockTree = ArrayBuffer[BlockNode | AST]
 enum BlockNode {
     case While(c: AST, bt: BlockTree)
     case If   (c: AST, bt: BlockTree)
-    case ForTo(v: String, s: AST, e: AST, bt: BlockTree)
-    case ForIn(v: String, arr: AST, bt: BlockTree)
-    case Fn   (v: String, bt: BlockTree)
+    case ForTo(v: Int, s: AST, e: AST, bt: BlockTree)
+    case ForIn(v: Int, arr: AST, bt: BlockTree)
+    case Fn   (v: Int, bt: BlockTree)
     case Null ()
 }

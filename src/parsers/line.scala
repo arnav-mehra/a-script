@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 
 import types.util.*
 import parsers.block.*
-import runner.Runner.{functions, variables, run_function}
+import runner.Runner.{functions, run_function, vars, var_to_idx}
 
 object LineParser extends JavaTokenParsers {
     def parse(ln: String): AST = {
@@ -35,26 +35,22 @@ object LineParser extends JavaTokenParsers {
 
     def var_setter:Parser[AST] = variable ~ ("="|"+="|"-="|"*="|"/=") ~ getter ^^ {
         case v~s~op2 => {
-            if (!variables.contains(v)) {
-                variables(v) = Data.Number(0)
-            }
-
             () => {
-                def op1: Data = variables(v)
+                def op1: Data = vars(v)
 
                 op1 match {
                     case Data.Number(v1) => { // immutable structures 
                         s match {
-                            case "="  => variables(v) = op2()
-                            case "+=" => variables(v) = op1 + op2()
-                            case "-=" => variables(v) = op1 - op2()
-                            case "*=" => variables(v) = op1 * op2()
-                            case "/=" => variables(v) = op1 / op2()
+                            case "="  => vars(v) = op2()
+                            case "+=" => vars(v) = op1 + op2()
+                            case "-=" => vars(v) = op1 - op2()
+                            case "*=" => vars(v) = op1 * op2()
+                            case "/=" => vars(v) = op1 / op2()
                         }
                     }
                     case default => { // mutable structures
                         s match {
-                            case "="  => variables(v) = op2()
+                            case "="  => vars(v) = op2()
                             case "+=" => op1 += op2()
                             case default => println("wtf")
                         }
@@ -78,7 +74,7 @@ object LineParser extends JavaTokenParsers {
             val ls: List[AST] = List(ls_0) ::: ls_rem.map(s => s._1._2)
 
             () => {
-                var op1 = variables(v)
+                var op1 = vars(v)
                 for (i <- 0 to ls.length - 2) op1 = op1->(ls(i)())
                 val fin = ls.last()
 
@@ -156,7 +152,7 @@ object LineParser extends JavaTokenParsers {
         case v~ls => {
             // print("fielder")
             () => {
-                def x = variables(v)
+                def x = vars(v)
                 ls.foldLeft(x)((acc, f) => acc->(f._1._2()))
             }
         }
@@ -170,8 +166,16 @@ object LineParser extends JavaTokenParsers {
 
     // DATA TYPES / LITERALS
 
-    def variable: Parser[String] = "[a-zA-Z_][a-zA-Z_0-9]*".r ^^ {
-        s => variables(s) = Data.Number(0); s
+    def variable: Parser[Int] = "[a-zA-Z_][a-zA-Z_0-9]*".r ^^ {
+        s => {
+            if (!var_to_idx.contains(s)) {
+                val i: Int = var_to_idx.size
+                val d: Data = Data.Number(0)
+                var_to_idx(s) = i
+                vars.append(d)
+            }
+            var_to_idx(s)
+        }
     }
 
     def literal: Parser[Data] = number | array | string | obj

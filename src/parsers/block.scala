@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 
 import types.util.*
 import parsers.line.LineParser
-import runner.Runner.{functions, variables}
+import runner.Runner.{functions, var_to_idx, vars}
 
 object ProgramParser extends JavaTokenParsers {
     def keywords = Array("if", "while", "for", "to", "in", "fn")
@@ -89,7 +89,13 @@ object ProgramParser extends JavaTokenParsers {
         LineParser.parse(s)
     })
 
-    def variable:Parser[String] = "[a-zA-Z_][a-zA-Z_0-9]*".r ^^ (s => {
-        variables(s) = Data.Number(0); s
+    def variable:Parser[Int] = "[a-zA-Z_][a-zA-Z_0-9]*".r ^^ (s => {
+        if (!var_to_idx.contains(s)) {
+            val i: Int = var_to_idx.size
+            val d: Data = Data.Number(0)
+            var_to_idx(s) = i
+            vars.append(d)
+        }
+        var_to_idx(s)
     })
 }

@@ -1,18 +1,18 @@
 package runner
 
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashSet
 
 import types.util.*
 import parsers.block.*
 import parsers.line.*
-import scala.collection.mutable.ArrayBuffer
 
 object Runner {
-    val functions: HashMap[String, BlockTree] = HashMap();
-    val variables: HashMap[String, Data] = HashMap();
+    val functions: HashMap[Int, BlockTree] = HashMap();
 
-    val _var_to_idx: HashMap[String, Int] = HashMap();
-    val _vars: ArrayBuffer[Data] = ArrayBuffer();
+    val var_to_idx: HashMap[String, Int] = HashMap();
+    val vars: ArrayBuffer[Data] = ArrayBuffer();
 
     def run_iter(tree: BlockTree): Unit = {
         for node <- tree do {
@@ -40,7 +40,7 @@ object Runner {
                 varr match {
                     case Data.Array(arr) => {
                         for (x <- arr) {
-                            variables(v) = x
+                            vars(v) = x
                             run_iter(bt)
                         }
                     }
@@ -53,7 +53,7 @@ object Runner {
                 (st, ed) match {
                     case (Data.Number(si), Data.Number(ei)) => {
                         for (i <- si.toInt to ei.toInt) {
-                            variables(v) = Data.Number(i)
+                            vars(v) = Data.Number(i)
                             run_iter(bt)
                         }
                     }
@@ -65,8 +65,8 @@ object Runner {
         }
     }
 
-    def run_function(fn_name: String): Data = {
-        val tree: BlockTree = functions(fn_name)
+    def run_function(fn_idx: Int): Data = {
+        val tree: BlockTree = functions(fn_idx)
         val (exec_tree, last_ln) = tree.splitAt(tree.length - 1)
         run_iter(exec_tree)
 
@@ -79,11 +79,11 @@ object Runner {
     def run(code: String) = {
         val res: BlockTree = ProgramParser.parse(code)
 
-        variables.zipWithIndex.foreach((p, i) => {
-            val (s, d) = p
-            _var_to_idx(s) = i
-            _vars.append(d);
-        })
+        // variables.zipWithIndex.foreach((p, i) => {
+        //     val (s, d) = p
+        //     var_to_idx(s) = i
+        //     vars.append(d);
+        // })
 
         run_iter(res)
     }
