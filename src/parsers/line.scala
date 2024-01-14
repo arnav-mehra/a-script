@@ -46,11 +46,8 @@ object LineParser extends JavaTokenParsers {
     }
 
     def field_setter:Parser[AST] =
-        variable
-        ~ "[" ~ getter ~ "]"
-        ~ rep("[" ~ getter ~ "]")
-        ~ ("="|"+="|"-="|"*="|"/=")
-        ~ getter
+        variable ~ "[" ~ getter ~ "]" ~ rep("[" ~ getter ~ "]")
+        ~ ("="|"+="|"-="|"*="|"/=") ~ getter
     ^^ {
         case v~"["~ls_0~"]"~ls_rem~s~op2 => {
             val ls: List[AST] = List(ls_0) ::: ls_rem.map(s => s._1._2)
@@ -125,10 +122,9 @@ object LineParser extends JavaTokenParsers {
 
     def accessor:Parser[AST] = variable ~ rep("[" ~ getter ~ "]") ^^ {
         case v~ls => {
-            () => {
-                def x = vars(v)
-                ls.foldLeft(x)((acc, f) => acc->(f._1._2()))
-            }
+            if (ls.length == 1) (() => vars(v) -> ls(0)._1._2()) // inline for common case: var[f]
+            val base = (() => vars(v))
+            ls.foldLeft(base)((acc, f) => (() => acc() -> f._1._2()))
         }
     }
 
@@ -174,27 +170,20 @@ object LineParser extends JavaTokenParsers {
         "[]" ^^ (_ => Data.Array(ArrayBuffer()))
         | "[" ~ literal ~ rep("," ~ literal) ~ "]" ^^ {
             case "["~n~lst~"]" => {
-                val arr = ArrayBuffer(n) ++ lst.map(p => p._2)
-                Data.Array(arr)
+                Data.Array(ArrayBuffer(n) ++ lst.map(p => p._2))
             }
         }
 
     def obj: Parser[Data] = 
         "##" ^^ (_ => Data.Object(HashMap()))
-        "#" ~ obj_ent_ls ~ obj_ent ~ "#" ^^ {
-            case "#"~hm~obj_ent~"#" => {
-                hm(obj_ent._1) = obj_ent._2
+        "#" ~ obj_ent ~ rep("," ~ obj_ent) ~ "#" ^^ {
+            case "#"~e1~els~"#" => {
+                val hm: HashMap[Data, Data] = HashMap()
+                hm(e1._1) = e1._2
+                els.foreach(p => hm(p._2._1) = p._2._2)
                 Data.Object(hm)
             }
         }
-
-    def obj_ent_ls: Parser[HashMap[Data, Data]] = rep(obj_ent ~ ",") ^^ {
-        ls => {
-            val hm: HashMap[Data, Data] = HashMap()
-            ls.foreach(p => hm(p._1._1) = p._1._2)
-            hm
-        }
-    }
     
     def obj_ent: Parser[(Data, Data)] = literal ~ ":" ~ literal ^^ {
         case l1~":"~l2 => (l1, l2)

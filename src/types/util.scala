@@ -24,14 +24,9 @@ enum Data {
     }
 
     def set(idx: Data, x: Data) = {
-        (this, idx, x) match {
-            case (Array(v), Number(i), _) => v(i.toInt) = x
-            // not possible until mut string type is used...
-            // case (String(v), Number(i), String(xs)) => { 
-            //     val sb = StringBuilder(v)
-            //     sb.replace(i.toInt, i.toInt + xs.length(), xs)
-            // }
-            case (Object(v), _, _)         => v(idx) = x
+        (this, idx) match {
+            case (Array(v),  Number(i)) => v(i.toInt) = x
+            case (Object(v), _)         => v(idx) = x
             case default => println("shit!"); this
         }
     }
@@ -122,7 +117,7 @@ enum Data {
         (this, op2) match {
             case (Number(v1), Number(v2)) => v1 == v2
             case (String(v1), String(v2)) => v1 == v2
-            case (Array(v1), Array(v2))   => {
+            case (Array(v1),  Array(v2) ) => {
                 v1.zip(v2).foldLeft(false)((acc, p) => acc || (p._1 == p._2))
             }
             case (Object(v1), Object(v2)) => {
