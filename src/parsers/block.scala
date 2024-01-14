@@ -9,35 +9,30 @@ import parsers.line.LineParser
 import runner.Runner.{functions, var_to_idx, vars}
 
 object ProgramParser extends JavaTokenParsers {
-    def parse(code: String): AST = {
-        parseAll(program, code).get
-    }
+    def parse(code: String): AST = parseAll(program, code).get
 
-    def program:Parser[AST] = rep(node) ^^ (
-        raw_lst => {
-            val lst: List[AST] = raw_lst.collect { case Some(a) => a }
-            val ls = lst.to(ArrayBuffer)
+    def program:Parser[AST] = rep(node) ^^ (raw_lst => {
+        val lst: List[AST] = raw_lst.collect { case Some(a) => a }
+        val ls = lst.to(ArrayBuffer)
 
-            (() => {
-                ls.foreach(ast => ast())
-                Data.Number(0)
-            })
-        }
-    )
+        (() => {
+            ls.foreach(ast => ast())
+            Data.Number(0)
+        })
+    })
 
-    def node:Parser[Option[AST]] = line ^^ (s => Some(s)) | block
+    def node:Parser[Option[AST]] = line ^^ (Some.apply) | block
 
     // BLOCKS
 
     def block:Parser[Option[AST]] = 
-        function_block
-        | while_block ^^ (s => Some(s))
-        | if_block ^^ (s => Some(s))
-        | for_block ^^ (s => Some(s))
+        function_block ^^ (_ => None)
+        | while_block  ^^ (Some.apply)
+        | if_block     ^^ (Some.apply)
+        | for_block    ^^ (Some.apply)
 
-    def function_block:Parser[Option[AST]] = "~fn~" ~ variable ~ block_core ^^ {
-        case "~fn~"~v~b => functions(v) = b; None
-        case default    => println("wtf"); None
+    def function_block:Parser[Unit] = "~fn~" ~ variable ~ block_core ^^ {
+        case "~fn~"~v~b => functions(v) = b;
     }
 
     def while_block:Parser[AST] = "~while~" ~ statement ~ block_core ^^ {
@@ -45,7 +40,6 @@ object ProgramParser extends JavaTokenParsers {
             while (c()._is_truthy) bt()
             Data.Number(0)
         })
-        case default => println("wtf"); (() => Data.Number(0))
     }
 
     def if_block:Parser[AST] = "~if~" ~ statement ~ block_core ^^ {
@@ -53,7 +47,6 @@ object ProgramParser extends JavaTokenParsers {
             if (c()._is_truthy) bt()
             Data.Number(0)
         })
-        case default => println("wtf"); (() => Data.Number(0))
     }
 
     def for_block:Parser[AST] =
@@ -76,7 +69,6 @@ object ProgramParser extends JavaTokenParsers {
             }
             varr
         })
-        case default => println("wtf"); (() => Data.Number(0))
     }
 
     def for_to_block:Parser[AST] =
@@ -96,21 +88,17 @@ object ProgramParser extends JavaTokenParsers {
             }
             Data.Number(0)
         })
-        case default => println("wtf"); (() => Data.Number(0))
     }
 
     def block_core:Parser[AST] = "{" ~ program ~ "}" ^^ {
         case "{"~bt~"}" => bt
-        case default    => (() => Data.Number(0))
     }
 
     // PRIMS
 
     def line:Parser[AST] = statement ~ ";" ^^ (s => s._1)
 
-    def statement:Parser[AST] = "[^;{}$~]+".r ^^ (s => {
-        LineParser.parse(s)
-    })
+    def statement:Parser[AST] = "[^;{}$~]+".r ^^ (LineParser.parse)
 
     def variable:Parser[Int] = "[a-zA-Z_][a-zA-Z_0-9]*".r ^^ (s => {
         if (!var_to_idx.contains(s)) {

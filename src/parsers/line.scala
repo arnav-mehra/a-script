@@ -9,9 +9,7 @@ import parsers.block.*
 import runner.Runner.{functions, vars, var_to_idx}
 
 object LineParser extends JavaTokenParsers {
-    def parse(ln: String): AST = {
-        parseAll(line, ln).get
-    }
+    def parse(ln: String): AST = parseAll(line, ln).get
 
     def line:Parser[AST] = printer | setter | getter
 
@@ -36,15 +34,13 @@ object LineParser extends JavaTokenParsers {
                 case "-=" => (() => { vars(v) = vars(v) - op2(); vars(v) })
                 case "*=" => (() => { vars(v) = vars(v) * op2(); vars(v) })
                 case "/=" => (() => { vars(v) = vars(v) / op2(); vars(v) })
-                case "+=" => {
-                    (() => {
-                        vars(v) match {
-                            case Data.Number(n) => vars(v) = vars(v) + op2()
-                            case default        => vars(v) += op2()
-                        }
-                        vars(v)
-                    })
-                }
+                case "+=" => (() => {
+                    vars(v) match {
+                        case Data.Number(n) => vars(v) = vars(v) + op2()
+                        case default        => vars(v) += op2()
+                    }
+                    vars(v)
+                })
             }
         }
     }
@@ -57,10 +53,9 @@ object LineParser extends JavaTokenParsers {
         ~ getter
     ^^ {
         case v~"["~ls_0~"]"~ls_rem~s~op2 => {
-            println("field_setter")
             val ls: List[AST] = List(ls_0) ::: ls_rem.map(s => s._1._2)
 
-            () => {
+            (() => {
                 var op1 = vars(v)
                 for (i <- 0 to ls.length - 2) op1 = op1->(ls(i)())
                 val fin = ls.last()
@@ -79,11 +74,7 @@ object LineParser extends JavaTokenParsers {
                 }
 
                 op1
-            }
-        }
-        case default => {
-            println("wtf")
-            () => Data.Number(0)
+            })
         }
     }
 
@@ -128,7 +119,7 @@ object LineParser extends JavaTokenParsers {
 
     def factor:Parser[AST] =
         "(" ~ getter ~ ")" ^^ (x => x._1._2)
-        | literal ^^ {s => (() => s)}
+        | literal          ^^ {s => (() => s)}
         | caller
         | accessor
 
@@ -145,8 +136,6 @@ object LineParser extends JavaTokenParsers {
         case v~"()" => functions(v)
     }
 
-    // DATA TYPES / LITERALS
-
     def variable: Parser[Int] = "[a-zA-Z_][a-zA-Z_0-9]*".r ^^ {
         s => {
             if (!var_to_idx.contains(s)) {
@@ -158,6 +147,8 @@ object LineParser extends JavaTokenParsers {
             var_to_idx(s)
         }
     }
+
+    // LITERALS
 
     def literal: Parser[Data] = number | array | string | obj
 
@@ -180,32 +171,20 @@ object LineParser extends JavaTokenParsers {
     }
 
     def array: Parser[Data] =
-        "[]" ^^ {
-            _ => Data.Array(ArrayBuffer())
-        }
+        "[]" ^^ (_ => Data.Array(ArrayBuffer()))
         | "[" ~ literal ~ rep("," ~ literal) ~ "]" ^^ {
             case "["~n~lst~"]" => {
                 val arr = ArrayBuffer(n) ++ lst.map(p => p._2)
                 Data.Array(arr)
             }
-            case default => {
-                println("wtf");
-                Data.Array(ArrayBuffer())
-            }
         }
 
     def obj: Parser[Data] = 
-        "##" ^^ (_ => {
-            println("doing it")
-            Data.Object(HashMap())
-        })
+        "##" ^^ (_ => Data.Object(HashMap()))
         "#" ~ obj_ent_ls ~ obj_ent ~ "#" ^^ {
             case "#"~hm~obj_ent~"#" => {
                 hm(obj_ent._1) = obj_ent._2
                 Data.Object(hm)
-            }
-            case default => {
-                Data.Object(HashMap())
             }
         }
 
@@ -219,6 +198,5 @@ object LineParser extends JavaTokenParsers {
     
     def obj_ent: Parser[(Data, Data)] = literal ~ ":" ~ literal ^^ {
         case l1~":"~l2 => (l1, l2)
-        case default => (Data.Number(0), Data.Number(0))
     }
 }
