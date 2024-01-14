@@ -9,76 +9,99 @@ import parsers.line.LineParser
 import runner.Runner.{functions, var_to_idx, vars}
 
 object ProgramParser extends JavaTokenParsers {
-    def keywords = Array("if", "while", "for", "to", "in", "fn")
-    def kw_regexes = keywords.map(s => (
-        "\\s" + s + "\\s", "~" + s + "~"
-    ))
-
-    def parse(code: String): BlockTree = {
-        // remove comments
-        var min_code = code.split("\n")
-                           .filter(s => s.length() < 2 || s.subSequence(0, 2) != "//")
-                           .mkString("\n")
-        // clarify keywords
-        kw_regexes.foreach(p => min_code = min_code.replaceAll(p._1, p._2))
-        // remove whitespace
-        min_code = min_code.replaceAll("\\s", "")
-
-        println(min_code)
-        // run
-        parseAll(program, min_code).get
+    def parse(code: String): AST = {
+        parseAll(program, code).get
     }
 
-    def program:Parser[BlockTree] = rep(node) ^^ (
-        lst => lst.to(ArrayBuffer)
+    def program:Parser[AST] = rep(node) ^^ (
+        raw_lst => {
+            val lst: List[AST] = raw_lst.collect { case Some(a) => a }
+            val ls = lst.to(ArrayBuffer)
+
+            (() => {
+                ls.foreach(ast => ast())
+                Data.Number(0)
+            })
+        }
     )
 
-    def node = line | block
+    def node:Parser[Option[AST]] = line ^^ (s => Some(s)) | block
 
     // BLOCKS
 
-    def block:Parser[BlockNode] = 
+    def block:Parser[Option[AST]] = 
         function_block
-        | while_block
-        | if_block
-        | for_block
+        | while_block ^^ (s => Some(s))
+        | if_block ^^ (s => Some(s))
+        | for_block ^^ (s => Some(s))
 
-    def function_block:Parser[BlockNode] = "~fn~" ~ variable ~ block_core ^^ {
-        case "~fn~"~v~b => BlockNode.Fn(v, b)
-        case default => println("wtf"); BlockNode.Null()
+    def function_block:Parser[Option[AST]] = "~fn~" ~ variable ~ block_core ^^ {
+        case "~fn~"~v~b => functions(v) = b; None
+        case default    => println("wtf"); None
     }
 
-    def while_block:Parser[BlockNode] = "~while~" ~ statement ~ block_core ^^ {
-        case "~while~"~s~b => BlockNode.While(s, b)
-        case default => println("wtf"); BlockNode.Null()
+    def while_block:Parser[AST] = "~while~" ~ statement ~ block_core ^^ {
+        case "~while~"~c~bt => (() => {
+            while (c()._is_truthy) bt()
+            Data.Number(0)
+        })
+        case default => println("wtf"); (() => Data.Number(0))
     }
 
-    def if_block:Parser[BlockNode] = "~if~" ~ statement ~ block_core ^^ {
-        case "~if~"~s~bt => BlockNode.If(s, bt)
-        case default => println("wtf"); BlockNode.Null()
+    def if_block:Parser[AST] = "~if~" ~ statement ~ block_core ^^ {
+        case "~if~"~c~bt => (() => {
+            if (c()._is_truthy) bt()
+            Data.Number(0)
+        })
+        case default => println("wtf"); (() => Data.Number(0))
     }
 
-    def for_block:Parser[BlockNode] =
+    def for_block:Parser[AST] =
         "~for~" ~ (for_in_block | for_to_block)
     ^^ (s => s._2)
 
-    def for_in_block:Parser[BlockNode] =
+    def for_in_block:Parser[AST] =
         variable ~ ":" ~ statement ~ block_core
     ^^ {
-        case v~":"~arr~bt => BlockNode.ForIn(v, arr, bt)
-        case default => println("wtf"); BlockNode.Null()
+        case v~":"~sarr~bt => (() => {
+            val varr: Data = sarr()
+            varr match {
+                case Data.Array(arr) => {
+                    for (x <- arr) {
+                        vars(v) = x
+                        bt()
+                    }
+                }
+                case default => println("wtf")
+            }
+            varr
+        })
+        case default => println("wtf"); (() => Data.Number(0))
     }
 
-    def for_to_block:Parser[BlockNode] =
+    def for_to_block:Parser[AST] =
         variable ~ ":" ~ statement ~ "~to~" ~ statement ~ block_core
     ^^ {
-        case v~":"~s~"~to~"~e~bt => BlockNode.ForTo(v, s, e, bt)
-        case default => println("wtf"); BlockNode.Null()
+        case v~":"~s~"~to~"~e~bt => (() => {
+            val st: Data = s()
+            val ed: Data = e()
+            (st, ed) match {
+                case (Data.Number(si), Data.Number(ei)) => {
+                    for (i <- si.toInt to ei.toInt) {
+                        vars(v) = Data.Number(i)
+                        bt()
+                    }
+                }
+                case default => println("wtf")
+            }
+            Data.Number(0)
+        })
+        case default => println("wtf"); (() => Data.Number(0))
     }
 
-    def block_core:Parser[BlockTree] = "{" ~ program ~ "}" ^^ {
+    def block_core:Parser[AST] = "{" ~ program ~ "}" ^^ {
         case "{"~bt~"}" => bt
-        case default    => ArrayBuffer()
+        case default    => (() => Data.Number(0))
     }
 
     // PRIMS

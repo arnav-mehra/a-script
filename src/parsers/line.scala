@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 
 import types.util.*
 import parsers.block.*
-import runner.Runner.{functions, run_function, vars, var_to_idx}
+import runner.Runner.{functions, vars, var_to_idx}
 
 object LineParser extends JavaTokenParsers {
     def parse(ln: String): AST = {
@@ -18,15 +18,11 @@ object LineParser extends JavaTokenParsers {
     // PRINTER
 
     def printer:Parser[AST] = getter ~ "!" ^^ {
-        case v~"!" => {
-            v match {
-                case v: AST => (() => {
-                    val x = v()
-                    println(x)
-                    x
-                })
-            }
-        }
+        case v~"!" => (() => {
+            val x = v()
+            println(x)
+            x
+        })
     }
 
     // SETTER / MUTATOR
@@ -35,29 +31,20 @@ object LineParser extends JavaTokenParsers {
 
     def var_setter:Parser[AST] = variable ~ ("="|"+="|"-="|"*="|"/=") ~ getter ^^ {
         case v~s~op2 => {
-            () => {
-                def op1: Data = vars(v)
-
-                op1 match {
-                    case Data.Number(v1) => { // immutable structures 
-                        s match {
-                            case "="  => vars(v) = op2()
-                            case "+=" => vars(v) = op1 + op2()
-                            case "-=" => vars(v) = op1 - op2()
-                            case "*=" => vars(v) = op1 * op2()
-                            case "/=" => vars(v) = op1 / op2()
+            s match {
+                case "="  => (() => { vars(v) = op2();           vars(v) })
+                case "-=" => (() => { vars(v) = vars(v) - op2(); vars(v) })
+                case "*=" => (() => { vars(v) = vars(v) * op2(); vars(v) })
+                case "/=" => (() => { vars(v) = vars(v) / op2(); vars(v) })
+                case "+=" => {
+                    (() => {
+                        vars(v) match {
+                            case Data.Number(n) => vars(v) = vars(v) + op2()
+                            case default        => vars(v) += op2()
                         }
-                    }
-                    case default => { // mutable structures
-                        s match {
-                            case "="  => vars(v) = op2()
-                            case "+=" => op1 += op2()
-                            case default => println("wtf")
-                        }
-                    }
+                        vars(v)
+                    })
                 }
-
-                op1
             }
         }
     }
@@ -104,41 +91,38 @@ object LineParser extends JavaTokenParsers {
 
     def getter:Parser[AST] = expression ~ rep(("=="|"!="|"<"|">"|"<="|">=") ~ expression) ^^ {
         case e1~lst => {
-            // println("getter: comparison")
-            () => {
-                lst.foldLeft(e1())((acc, t) => {
-                    t._1 match {
-                        case "==" => acc == t._2()
-                        case "!=" => acc != t._2()
-                        case ">=" => acc >= t._2()
-                        case ">"  => acc >  t._2()
-                        case "<=" => acc <= t._2()
-                        case "<"  => acc <  t._2()
-                    }
-                })
-            }
+            lst.foldLeft(e1)((acc, t) => {
+                t._1 match {
+                    case "==" => () => acc() == t._2()
+                    case "!=" => () => acc() != t._2()
+                    case ">=" => () => acc() >= t._2()
+                    case ">"  => () => acc() >  t._2()
+                    case "<=" => () => acc() <= t._2()
+                    case "<"  => () => acc() <  t._2()
+                }
+            })
         }
     }
 
     def expression:Parser[AST] = term ~ rep(("+"|"-") ~ term) ^^ {
         case t1~lst => {
-            // print("expr: "); print(t1); print(", "); println(lst)
-            () => {
-                lst.foldLeft(t1())(
-                    (acc, t) => if (t._1 == "+") acc + t._2() else acc - t._2()
-                )
-            }
+            lst.foldLeft(t1)((acc, t) => {
+                t._1 match {
+                    case "+" => (() => acc() + t._2())
+                    case "-" => (() => acc() - t._2())
+                }
+            })
         }
     }
 
     def term:Parser[AST] = factor ~ rep(("*"|"/") ~ factor) ^^ {
         case f1~lst => {
-            // println("term")
-            () => {
-                lst.foldLeft(f1())(
-                    (acc, f) => if (f._1 == "*") acc * f._2() else acc / f._2()
-                )
-            }
+            lst.foldLeft(f1)((acc, f) => {
+                f._1 match {
+                    case "*" => (() => acc() * f._2())
+                    case "/" => (() => acc() / f._2())
+                }
+            })
         }
     }
 
@@ -150,7 +134,6 @@ object LineParser extends JavaTokenParsers {
 
     def accessor:Parser[AST] = variable ~ rep("[" ~ getter ~ "]") ^^ {
         case v~ls => {
-            // print("fielder")
             () => {
                 def x = vars(v)
                 ls.foldLeft(x)((acc, f) => acc->(f._1._2()))
@@ -159,9 +142,7 @@ object LineParser extends JavaTokenParsers {
     }
 
     def caller: Parser[AST] = variable ~ "()" ^^ {
-        case v~"()" => {
-            () => run_function(v)
-        }
+        case v~"()" => functions(v)
     }
 
     // DATA TYPES / LITERALS

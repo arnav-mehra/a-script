@@ -2,8 +2,9 @@ package types.util
 
 import scala.collection.mutable.HashMap
 import java.lang.{String => SString}
-import scala.{Array => AArray}
 import scala.collection.mutable.ArrayBuffer
+
+type AST = (() => Data)
 
 enum Data {
     case Number(v: Double)
@@ -40,11 +41,11 @@ enum Data {
     def +=(op2: Data): Unit = {
         (this, op2) match {
             case (String(v1), String(v2)) => v1 ++: v2
+            case (String(v1), Number(v2)) => v1 ++: v2.toString()
             case (Array(v1),  Array(v2) ) => v1.appendAll(v2)
+            case (Array(v1),  _)          => v1.append(op2)
             case (Object(v1), Object(v2)) => v1 ++= v2
             case (Object(v1), Array(v2) ) => v1(v2(0)) = v2(1)
-            case (Array(v1),  _)          => v1.append(op2)
-            case (String(v1), Number(v2)) => v1 ++: v2.toString()
             case default => println("shit!")
         }
     }
@@ -140,17 +141,4 @@ enum Data {
             case String(v) => v.length() != 0
         }
     }
-}
-
-
-type AST = (() => Data)
-type BlockTree = ArrayBuffer[BlockNode | AST]
-
-enum BlockNode {
-    case While(c: AST, bt: BlockTree)
-    case If   (c: AST, bt: BlockTree)
-    case ForTo(v: Int, s: AST, e: AST, bt: BlockTree)
-    case ForIn(v: Int, arr: AST, bt: BlockTree)
-    case Fn   (v: Int, bt: BlockTree)
-    case Null ()
 }
