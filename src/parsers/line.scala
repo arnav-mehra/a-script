@@ -5,144 +5,83 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 
 import types.util.*
+import types.data.*
 import parsers.block.*
-import runner.Runner.{functions, vars, var_to_idx}
 
 object LineParser extends JavaTokenParsers {
-    def parse(ln: String): AST = parseAll(line, ln).get
+    def parse(ln: String): Node = {
+        parseAll(line, ln).get
+    }
 
-    def line:Parser[AST] = printer | setter | getter
+    def line:Parser[Node] = printer | setter | getter
 
     // PRINTER
 
-    def printer:Parser[AST] = getter ~ "!" ^^ {
-        case v~"!" => (() => {
-            val x = v()
-            println(x)
-            x
-        })
-    }
+    def printer:Parser[Node] = getter ~ "!" ^^ (
+        s => Node.Print(s._1)
+    )
 
     // SETTER / MUTATOR
 
-    def setter:Parser[AST] = var_setter | field_setter
-
-    def var_setter:Parser[AST] = variable ~ ("="|"+="|"-="|"*="|"/=") ~ getter ^^ {
-        case v~s~op2 => {
-            s match {
-                case "="  => (() => { vars(v) = op2();           vars(v) })
-                case "-=" => (() => { vars(v) = vars(v) - op2(); vars(v) })
-                case "*=" => (() => { vars(v) = vars(v) * op2(); vars(v) })
-                case "/=" => (() => { vars(v) = vars(v) / op2(); vars(v) })
-                case "+=" => (() => {
-                    vars(v) match {
-                        case Data.Number(n) => vars(v) = vars(v) + op2()
-                        case default        => vars(v) += op2()
-                    }
-                    vars(v)
-                })
-            }
-        }
-    }
-
-    def field_setter:Parser[AST] =
-        variable ~ "[" ~ getter ~ "]" ~ rep("[" ~ getter ~ "]")
-        ~ ("="|"+="|"-="|"*="|"/=") ~ getter
+    def setter:Parser[Node] = 
+        variable ~ rep(field) ~ ("="|"+="|"-="|"*="|"/=") ~ getter
     ^^ {
-        case v~"["~ls_0~"]"~ls_rem~s~op2 => {
-            val ls: List[AST] = List(ls_0) ::: ls_rem.map(s => s._1._2)
-
-            (() => {
-                var op1 = vars(v)
-                for (i <- 0 to ls.length - 2) op1 = op1->(ls(i)())
-                val fin = ls.last()
-
-                op1 match {
-                    case Data.Number(v1) => { // immutable structures 
-                        println("wtf")
-                    }
-                    case default => { // mutable structures
-                        s match {
-                            case "="  => op1.set(fin, op2())
-                            case "+=" => op1.set(fin, op2())
-                            case default => println("wtf")
-                        }
-                    }
-                }
-
-                op1
-            })
-        }
+        case v~ls~op~e => Node.Set(v, ls.to(ArrayBuffer), op, e)
     }
 
     // GETTER / EVALUATOR
 
-    def getter:Parser[AST] = expression ~ rep(("=="|"!="|"<"|">"|"<="|">=") ~ expression) ^^ {
-        case e1~lst => {
+    def formOpBlock(e1: Node, lst: List[String~Node]): Node = {
+        if (lst.length == 0) {
+            e1
+        } else {
             lst.foldLeft(e1)((acc, t) => {
-                t._1 match {
-                    case "==" => () => acc() == t._2()
-                    case "!=" => () => acc() != t._2()
-                    case ">=" => () => acc() >= t._2()
-                    case ">"  => () => acc() >  t._2()
-                    case "<=" => () => acc() <= t._2()
-                    case "<"  => () => acc() <  t._2()
-                }
+                Node.BinOp(acc, t._1, t._2)
             })
         }
     }
 
-    def expression:Parser[AST] = term ~ rep(("+"|"-") ~ term) ^^ {
-        case t1~lst => {
-            lst.foldLeft(t1)((acc, t) => {
-                t._1 match {
-                    case "+" => (() => acc() + t._2())
-                    case "-" => (() => acc() - t._2())
-                }
-            })
-        }
+    def getter:Parser[Node] = expression ~ rep(("=="|"!="|"<"|">"|"<="|">=") ~ expression) ^^ {
+        case e1~lst => formOpBlock(e1, lst)
     }
 
-    def term:Parser[AST] = factor ~ rep(("*"|"/") ~ factor) ^^ {
-        case f1~lst => {
-            lst.foldLeft(f1)((acc, f) => {
-                f._1 match {
-                    case "*" => (() => acc() * f._2())
-                    case "/" => (() => acc() / f._2())
-                }
-            })
-        }
+    def expression:Parser[Node] = term ~ rep(("+"|"-") ~ term) ^^ {
+        case e1~lst => formOpBlock(e1, lst)
     }
 
-    def factor:Parser[AST] =
+    def term:Parser[Node] = factor ~ rep(("*"|"/") ~ factor) ^^ {
+        case e1~lst => formOpBlock(e1, lst)
+    }
+
+    def factor:Parser[Node] =
         "(" ~ getter ~ ")" ^^ (x => x._1._2)
-        | literal          ^^ {s => (() => s)}
+        | literal          ^^ (s => Node.Const(s))
         | caller
         | accessor
 
-    def accessor:Parser[AST] = variable ~ rep("[" ~ getter ~ "]") ^^ {
+    def accessor:Parser[Node] = variable ~ rep(field) ^^ {
         case v~ls => {
-            if (ls.length == 1) (() => vars(v) -> ls(0)._1._2()) // inline for common case: var[f]
-            val base = (() => vars(v))
-            ls.foldLeft(base)((acc, f) => (() => acc() -> f._1._2()))
+            if (ls.length == 0) Node.Var(v)
+            else Node.Get(v, ls.to(ArrayBuffer))
         }
     }
 
-    def caller: Parser[AST] = variable ~ "()" ^^ {
-        case v~"()" => functions(v)
+    def field:Parser[Node] = "[" ~ getter ~ "]" ^^ (s => s._1._2)
+
+    def caller: Parser[Node] = variable ~ arg_list ^^ {
+        case v~bt => Node.Call(v, bt)
     }
 
-    def variable: Parser[Int] = "[a-zA-Z_][a-zA-Z_0-9]*".r ^^ {
-        s => {
-            if (!var_to_idx.contains(s)) {
-                val i: Int = var_to_idx.size
-                val d: Data = Data.Number(0)
-                var_to_idx(s) = i
-                vars.append(d)
+    def arg_list: Parser[Tree] = 
+        "()" ^^ {s => ArrayBuffer()}
+        | "(" ~ getter ~ rep("," ~ getter) ~ ")" ^^ {
+            case "("~e1~ls~")" => {
+                ArrayBuffer(e1) ++ ls.map(s => s._2).to(ArrayBuffer)
             }
-            var_to_idx(s)
+            case default => println("wtf"); ArrayBuffer()
         }
-    }
+
+    def variable: Parser[String] = "[a-zA-Z_][a-zA-Z_0-9]*".r
 
     // LITERALS
 
@@ -172,6 +111,7 @@ object LineParser extends JavaTokenParsers {
             case "["~n~lst~"]" => {
                 Data.Array(ArrayBuffer(n) ++ lst.map(p => p._2))
             }
+            case default => println("wtf"); Data.Array(ArrayBuffer())
         }
 
     def obj: Parser[Data] = 
@@ -183,9 +123,11 @@ object LineParser extends JavaTokenParsers {
                 els.foreach(p => hm(p._2._1) = p._2._2)
                 Data.Object(hm)
             }
+            case default => println("wtf"); Data.Object(HashMap()) 
         }
     
     def obj_ent: Parser[(Data, Data)] = literal ~ ":" ~ literal ^^ {
         case l1~":"~l2 => (l1, l2)
+        case default => println("wtf"); (Data.Number(0), Data.Number(0)) 
     }
 }
