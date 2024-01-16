@@ -9,7 +9,7 @@ import types.data.*
 
 object Indexer {
     def digest(n: Node) = {
-        val Node.Fn(fn, ps, bt) = n
+        val Node.Fn(fn, ps, bt) = n: @unchecked
         Functions.add(fn, ps, bt)
         Indexer(fn).iter_tree(bt)
     }

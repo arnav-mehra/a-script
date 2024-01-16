@@ -25,6 +25,12 @@ enum DataType {
                     case (String, Number) => String
                     case (String, Object) => String
                     case (String, Array)  => String
+
+                    case (Any, _) => Any
+                    case (_, Any) => Any
+                    case (Void, _) => println("Cannot perform operation with void type."); Any
+                    case (_, Void) => println("Cannot perform operation with void type."); Any
+
                     case default => Number
                 }
             }

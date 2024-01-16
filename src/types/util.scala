@@ -4,6 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 import types.data.*
+import java.util.IdentityHashMap
 
 type Program = (ArrayBuffer[Data] => Data)
 type Ast = (() => Data)
@@ -33,7 +34,7 @@ class Function(
     val ps: ArrayBuffer[String],
     val bt: Tree
 ) {
-    val vars: HashMap[String, Int] = HashMap().addAll(ps.zipWithIndex)
+    val vars = HashMap().addAll(ps.zipWithIndex)
 
     def add_var(s: String) = {
         if (!vars.contains(s)) {
@@ -48,15 +49,13 @@ class Call(
 ) {
     def fn: Function = Functions.data(fn_name)
 
-    val var_types: HashMap[String, DataType] = HashMap().addAll(
-        fn.ps.zipWithIndex.map(v => (v._1, pt(v._2)))
-    )
-    val node_types: HashMap[Node, DataType] = HashMap()
-    val ret_type: DataType = DataType.Number
+    val var_types = HashMap().addAll(fn.ps.zipWithIndex.map(v => (v._1, pt(v._2))))
+    val node_types = IdentityHashMap[Node, DataType]()
+    var ret_type = DataType.Any
     val program: Program = (arr => Data.Number(0))
 
     def set_node_type(n: Node, dt: DataType) = {
-        node_types(n) = dt
+        node_types.put(n, dt)
     }
 
     def add_var_type(s: String, dt: DataType) = {
@@ -85,11 +84,9 @@ object Functions {
 }
 
 object Calls {
-    val data: HashMap[Node, Call] = HashMap()
+    val data: IdentityHashMap[Node, Call] = IdentityHashMap()
 
-    // def add(n: String, ps: ArrayBuffer[String], bt: Tree) = {
-    //     if (!data.contains(n)) {
-    //         data(n) = Function(n, ps, bt)
-    //     }
-    // }
+    def has = data.containsKey
+    def add = data.put
+    def get = data.get
 }

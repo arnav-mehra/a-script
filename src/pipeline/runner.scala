@@ -10,7 +10,7 @@ import parsers.block.*
 import parsers.line.*
 import pipeline.minimizer.* 
 // import pipeline.compiler.*
-// import pipeline.typer.*
+import pipeline.typer.*
 import pipeline.indexer.*
 
 object Runner {
@@ -18,23 +18,27 @@ object Runner {
         val mcode: String = Minimizer.digest(code)
         println(mcode); println()
 
-        val root: Node = ProgramParser.parse(mcode)
-        println(root); println()
+        val (root_fn: Node, root_caller: Node) = ProgramParser.parse(mcode)
+        println(root_fn); println()
 
-        Indexer.digest(root)
+        Indexer.digest(root_fn)
+        Typer.digest(root_caller)
 
         Functions.data.foreach((n, f) => {
             print(n + ": "); println(f.vars)
         })
+        println()
 
-        Typer.digest("_", )
-
+        Calls.data.forEach((n, c) => {
+            val Node.Call(f, _) = n: @unchecked
+            println(f + " -> " + c.ret_type)
+            println(c.var_types)
+        })
 
         // val typer = Typer("_")
         // val ret_type = typer.get_ret_type(res)
         // typer.node_types.foreach(a => {println(a); println()})
 
-        
         // val cctx = CompilerCtx()
         // val p: Program = cctx.genProgram(res)
         // val args: ArrayBuffer[Data] = ArrayBuffer.fill(ctx.var_to_idx.size)(Data.Number(0))

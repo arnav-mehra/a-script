@@ -116,7 +116,7 @@ object LineParser extends JavaTokenParsers {
 
     def obj: Parser[Data] = 
         "##" ^^ (_ => Data.Object(HashMap()))
-        "#" ~ obj_ent ~ rep("," ~ obj_ent) ~ "#" ^^ {
+        | "#" ~ obj_ent ~ rep("," ~ obj_ent) ~ "#" ^^ {
             case "#"~e1~els~"#" => {
                 val hm: HashMap[Data, Data] = HashMap()
                 hm(e1._1) = e1._2
