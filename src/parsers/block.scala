@@ -9,8 +9,9 @@ import types.data.*
 import parsers.line.LineParser
 
 object ProgramParser extends JavaTokenParsers {
-    def parse(code: String): Tree = {
-        parseAll(program, code).get
+    def parse(code: String): Node = {
+        val t: Tree = parseAll(program, code).get
+        Node.Fn("_", ArrayBuffer(), t)
     }
 
     def program:Parser[Tree] = rep(node) ^^ (

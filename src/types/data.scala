@@ -4,11 +4,49 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import java.lang.{String => SString}
 
+enum DataType {
+    case Number, String, Array, Object, Any, Void
+
+    def binOp(op: String, v2: DataType): DataType = {
+        op match {
+            case "+" => {
+                (this, v2) match {
+                    case (Number, Number) => Number
+                    case (String, String) => String
+                    case (Array,  Array)  => Array
+                    case (Object, Object) => Object
+                    
+                    case (Object, Array)  => Object
+                    case (Array, Object)  => Array
+        
+                    case (Array,  String) => Array
+                    case (Number, String) => String
+                    case (Object, String) => String
+                    case (String, Number) => String
+                    case (String, Object) => String
+                    case (String, Array)  => String
+                    case default => Number
+                }
+            }
+            case default => Number
+        }
+    }
+}
+
 enum Data {
     case Number(v: Double)
     case String(v: SString)
     case Array (v: ArrayBuffer[Data])
     case Object(v: HashMap[Data, Data])
+
+    def get_type(): DataType = {
+        this match {
+            case Data.Number(x) => DataType.Number
+            case Data.String(x) => DataType.String
+            case Data.Array(x)  => DataType.Array
+            case Data.Object(x) => DataType.Object
+        }
+    }
 
     // FIELD GETTERS & SETTERS
 
@@ -45,14 +83,21 @@ enum Data {
 
     def +(op2: Data): Data = {
         (this, op2) match {
-            case (Number(v1), Number(v2)) => Data.Number(v1 + v2)
+            case (Number(v1), Number(v2)) => Number(v1 + v2)
             case (String(v1), String(v2)) => String(v1 + v2)
             case (Array(v1),  Array(v2) ) => Array(v1 ++ v2)
             case (Object(v1), Object(v2)) => Object(v1 ++ v2)
             
+            case (Object(v1), Array(v2))  => {
+                val res = v1.clone()
+                res(v2(0)) = v2(1)
+                Object(res)
+            }
+            case (Array(v1), Object(v2)) => Array(v1.appended(op2))
+            case (Array(v1), String(v2)) => Array(v1.appended(op2))
+
             case (Number(v1), String(v2)) => String(v1.toString() + v2)
             case (Object(v1), String(v2)) => String(v1.toString() + v2)
-            case (Array(v1),  String(v2)) => String(v1.toString() + v2)
             case (String(v1), Number(v2)) => String(v1 + v2.toString())
             case (String(v1), Object(v2)) => String(v1 + v2.toString())
             case (String(v1), Array(v2))  => String(v1 + v2.toString())
