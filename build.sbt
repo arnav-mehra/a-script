@@ -5,3 +5,4 @@ libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % 
 unmanagedSourceDirectories in Compile += file("/src")
 unmanagedSourceDirectories in Compile += file("/src/parsers")
 unmanagedSourceDirectories in Compile += file("/src/types")
+unmanagedSourceDirectories in Compile += file("/src/pipeline")

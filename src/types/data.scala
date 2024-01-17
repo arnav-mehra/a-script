@@ -37,6 +37,25 @@ enum DataType {
             case default => Number
         }
     }
+
+    def is_iterable: Boolean = {
+        this match {
+            case Any | Array => true
+            case default => false
+        }
+    }
+
+    def is_void: Boolean = this == Void
+    def str: SString = this.toString()
+
+    def assignable(dt: DataType): Boolean = {
+        (this, dt) match {
+            case (Void, _) | (_, Void) => false // cannot assign void or be assigned void
+            case (`dt`, _) => true
+            case (Any, _) | (_, Any) => true    // any always compatible
+            case default   => false
+        }
+    }
 }
 
 enum Data {

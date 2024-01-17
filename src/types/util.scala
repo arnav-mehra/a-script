@@ -41,6 +41,8 @@ class Function(
             vars(s) = vars.size
         }
     }
+
+    def get_var(s: String) = vars(s)
 }
 
 class Call(
@@ -59,8 +61,8 @@ class Call(
     }
 
     def add_var_type(s: String, dt: DataType) = {
-        if (var_types.contains(s) && var_types(s) != dt) {
-            println("Cannot reassign variable type")
+        if (var_types.contains(s) && var_types(s).assignable(dt)) {
+            println("Cannot reassign " + s + " to type " + dt.str);
         }
         var_types(s) = dt
     }
@@ -71,6 +73,10 @@ class Call(
         }
         var_types(s)
     }
+}
+
+object Env {
+    var vars = ArrayBuffer[Data]()
 }
 
 object Functions {

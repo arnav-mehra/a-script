@@ -26,11 +26,9 @@ class Typer(caller: Node) {
     def fn: Function = Functions.data(fn_name)
 
     def gen_ret_type: DataType = {
-        val (bt_ls, bt_ret_ls) = fn.bt.splitAt(fn.bt.length - 1)
-        val bt_ret = bt_ret_ls(0)
-
-        bt_ls.foreach(a => gen_node_type(a))
-        gen_node_type(bt_ret)
+        val (bt_ls, bt_ret) = fn.bt.splitAt(fn.bt.length - 1)
+        iter_nodes(bt_ls)
+        gen_node_type(bt_ret(0))
     }
 
     def iter_nodes(bt: Tree): Unit = {
@@ -48,7 +46,8 @@ class Typer(caller: Node) {
                 DataType.Any
             }
             case Node.Print(e) => {
-                gen_node_type(e)
+                val dt: DataType = gen_node_type(e)
+                if (dt.is_void) println("Unable to print void expression")
                 DataType.Void
             }
             case Node.Var(v)   => {
@@ -64,7 +63,9 @@ class Typer(caller: Node) {
             }
             case Node.Set(v, fs_bt, op, e_bn) => {
                 val et = gen_node_type(e_bn)
-                if (fs_bt.length == 0) call.add_var_type(v, et)
+                if (op == "=" && fs_bt.length == 0) { // var assignment 
+                    call.add_var_type(v, et)
+                }
                 DataType.Void
             }
             case Node.BinOp(e1_bn, op, e2_bn) => {
@@ -85,6 +86,7 @@ class Typer(caller: Node) {
             case Node.ForIn(v, e_bn, bt) => {
                 call.add_var_type(v, DataType.Any)
                 val e = gen_node_type(e_bn)
+                if (!e.is_iterable) println("Cannot iterate over type " + e.str)
                 iter_nodes(bt)
                 DataType.Void
             }
