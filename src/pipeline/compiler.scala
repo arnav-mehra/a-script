@@ -15,22 +15,37 @@ object Compiler {
     val cache = IdentityHashMap[Node, Program]()
 
     def digest(caller: Node): Ast = {
-        Compiler(caller).gen_caller
+        Compiler(caller).gen_caller()
     }
 
-    def gen_program(caller: Node): Program = {
-        if (!cache.containsKey(caller)) {
-            val p: Program = Compiler(caller).gen_function
-            cache.put(caller, p)
-        }
-        cache.get(caller)
-    }
+    
 }
 
 class Compiler(caller: Node) {
     val Node.Call(f, arg_bt) = caller: @unchecked
     val fn: Function = Functions.data(f)
     val call: Call = Calls.get(caller)
+
+    def gen_caller(args: AstList = ArrayBuffer()): Ast = {
+        lazy val cb = gen_function_cached
+        val stack_sz = fn.vars.size
+
+        () => {
+            val stack = ArrayBuffer.fill[Data](stack_sz)(Data.Number(0))
+            for (i <- 0 to args.length - 1) {
+                stack(i) = args(i)()
+            }
+            cb(stack)
+        }
+    }
+
+    def gen_function_cached: Program = {
+        if (!Compiler.cache.containsKey(caller)) {
+            val p: Program = Compiler(caller).gen_function
+            Compiler.cache.put(caller, p)
+        }
+        Compiler.cache.get(caller)
+    }
 
     def gen_function: Program = {
         val ast_ls: AstList = gen_ast_list(fn.bt)
@@ -47,20 +62,6 @@ class Compiler(caller: Node) {
         }
     }
 
-    def gen_caller: Ast = {
-        lazy val cb = Compiler.gen_program(caller)
-        val stack_sz = fn.vars.size
-        val args = gen_ast_list(arg_bt)
-
-        () => {
-            val stack = ArrayBuffer.fill[Data](stack_sz)(Data.Number(0))
-            for (i <- 0 to args.length - 1) {
-                stack(i) = args(i)()
-            }
-            cb(stack)
-        }
-    }
-
     def gen_ast_list(bt: Tree): AstList = {
         bt.filter{
             case Node.Fn(_, _, _) => false
@@ -70,8 +71,9 @@ class Compiler(caller: Node) {
 
     def gen_ast(bn: Node): Ast = {
         bn match {
-            case Node.Call(n, bt) => {
-                Compiler.digest(bn)
+            case Node.Call(_, arg_bt) => {
+                val args = gen_ast_list(arg_bt)
+                Compiler(bn).gen_caller(args)
             }
             case Node.Const(n) => {
                 () => n
@@ -223,6 +225,7 @@ class Compiler(caller: Node) {
                     Data.Number(0)
                 }
             }
+            case Node.Fn(_, _, _) => () => Data.Number(0) // never executes, but makes scala happy.
         }
     }
 }
