@@ -30,6 +30,7 @@ object ProgramParser extends JavaTokenParsers {
         | while_block
         | if_block
         | for_block
+        | match_block
 
      def function_block:Parser[Node] = "fn~" ~ variable ~ param_list ~ block_core ^^ {
         case "fn~"~v~ps~b => Node.Fn(v, ps, b)
@@ -52,6 +53,15 @@ object ProgramParser extends JavaTokenParsers {
     def if_block:Parser[Node] = "if~" ~ statement ~ block_core ^^ {
         case "if~"~c~bt => Node.If(c, bt)
         case default => print("wtf"); Node.Const(Data.Number(0))
+    }
+
+    def match_block:Parser[Node] = "match~" ~ statement ~ "{" ~ rep(match_case) ~ "}" ^^ {
+        case "match~"~s~"{"~ls~"}" => Node.Match(s, ls.to(ArrayBuffer))
+        case default => print("wtf"); Node.Const(Data.Number(0))
+    }
+
+    def match_case:Parser[(Node, Tree)] = statement ~ ":" ~ block_core ^^ {
+        case s~":"~b => (s, b)
     }
 
     def for_block:Parser[Node] = "for~" ~ (for_in_block | for_to_block) ^^ (
@@ -78,7 +88,7 @@ object ProgramParser extends JavaTokenParsers {
         s => s._1
     )
 
-    def statement:Parser[Node] = "[^;{}$~]+".r ^^ {
+    def statement:Parser[Node] = "[^;{}$~]*[^:;{}$~]".r ^^ {
         s => LineParser.parse(s)
     }
 

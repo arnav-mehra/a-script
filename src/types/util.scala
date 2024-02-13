@@ -6,7 +6,7 @@ import scala.collection.mutable.HashMap
 import types.data.*
 import java.util.IdentityHashMap
 
-type Program = (ArrayBuffer[Data] => Data)
+type Program = (() => Data)
 type Ast = (() => Data)
 type AstList = ArrayBuffer[Ast]
 
@@ -14,6 +14,7 @@ type Tree = ArrayBuffer[Node]
 enum Node {
     // blocks
     case If   (c: Node, bt: Tree)
+    case Match(v: Node, c_ls: ArrayBuffer[(Node, Tree)])
     case While(c: Node, bt: Tree)
     case ForTo(v: String, s: Node, e: Node, bt: Tree)
     case ForIn(v: String, arr: Node, bt: Tree)
@@ -54,7 +55,7 @@ class Call(
     val var_types = HashMap().addAll(fn.ps.zipWithIndex.map(v => (v._1, pt(v._2))))
     val node_types = IdentityHashMap[Node, DataType]()
     var ret_type = DataType.Any
-    val program: Program = (arr => Data.Number(0))
+    val program: Program = (() => Data.Number(0))
 
     def set_node_type(n: Node, dt: DataType) = {
         node_types.put(n, dt)
@@ -76,7 +77,16 @@ class Call(
 }
 
 object Env {
-    var vars = ArrayBuffer[Data]()
+    val stack = ArrayBuffer.fill(1000)(Data.Number(0))
+    var stack_ptr = 0
+
+    def get_var(i: Int): Data = {
+        return stack(stack_ptr + i)
+    }
+
+    def set_var(i: Int, d: Data) = {
+        stack(stack_ptr + i) = d
+    }
 }
 
 object Functions {

@@ -185,13 +185,8 @@ enum Data {
         (this, op2) match {
             case (Number(v1), Number(v2)) => v1 == v2
             case (String(v1), String(v2)) => v1 == v2
-            case (Array(v1),  Array(v2) ) => {
-                v1.zip(v2).foldLeft(false)((acc, p) => acc || (p._1 == p._2))
-            }
-            case (Object(v1), Object(v2)) => {
-                ((v1.keySet -- v2.keySet).size == 0)
-                    && ((v2.keySet -- v1.keySet).size == 0)
-            }
+            case (Array(v1),  Array(v2) ) => v1.sameElements(v2)
+            case (Object(v1), Object(v2)) => v1.equals(v2)
             case default => println("shit!"); false
         }
     }

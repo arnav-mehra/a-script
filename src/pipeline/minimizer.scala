@@ -3,7 +3,7 @@ package pipeline.minimizer
 import scala.util.chaining._
 
 object Minimizer {
-    def top_keywords = Array("if", "while", "for", "fn")
+    def top_keywords = Array("if", "while", "for", "fn", "match")
     def mid_keywords = Array("to", "in")
     def kw_regexes = top_keywords.map(s => (s + "\\s", s + "~"))
                   ++ mid_keywords.map(s => ("\\s" + s + "\\s", "~" + s + "~"))

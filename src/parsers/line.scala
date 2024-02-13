@@ -41,7 +41,7 @@ object LineParser extends JavaTokenParsers {
         }
     }
 
-    def getter:Parser[Node] = expression ~ rep(("=="|"!="|"<"|">"|"<="|">=") ~ expression) ^^ {
+    def getter:Parser[Node] = expression ~ rep(("=="|"!="|"<="|">="|"<"|">") ~ expression) ^^ {
         case e1~lst => formOpBlock(e1, lst)
     }
 

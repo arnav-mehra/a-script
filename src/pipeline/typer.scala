@@ -10,13 +10,14 @@ import parsers.block.*
 import parsers.line.*
 
 object Typer {
-    def digest(caller: Node, pt: ArrayBuffer[DataType] = ArrayBuffer()) = {
+    def digest(caller: Node, pt: ArrayBuffer[DataType] = ArrayBuffer()): Call = {
         if (!Calls.has(caller)) {
             val Node.Call(fn_name, bt) = caller: @unchecked
             val c = Call(fn_name, pt)
             Calls.add(caller, c)
             c.ret_type = Typer(caller).gen_ret_type
         }
+        Calls.get(caller)
     }
 }
 
@@ -42,8 +43,8 @@ class Typer(caller: Node) {
             }
             case Node.Call(fn, bt) => {
                 val pt: ArrayBuffer[DataType] = bt.map(gen_node_type)
-                Typer.digest(bn, pt)
-                DataType.Any
+                val c = Typer.digest(bn, pt)
+                c.ret_type
             }
             case Node.Print(e) => {
                 val dt: DataType = gen_node_type(e)
@@ -55,6 +56,7 @@ class Typer(caller: Node) {
             }
             case Node.Const(n) => n.get_type()
             case Node.Get(v, fs_bt) => {
+                iter_nodes(fs_bt)
                 if (fs_bt.length == 0) {
                     call.get_var_type(v)
                 } else {
@@ -62,11 +64,11 @@ class Typer(caller: Node) {
                 }
             }
             case Node.Set(v, fs_bt, op, e_bn) => {
-                val et = gen_node_type(e_bn)
+                val et: DataType = gen_node_type(e_bn)
                 if (op == "=" && fs_bt.length == 0) { // var assignment 
                     call.add_var_type(v, et)
                 }
-                DataType.Void
+                et
             }
             case Node.BinOp(e1_bn, op, e2_bn) => {
                 val e1t: DataType = gen_node_type(e1_bn)
@@ -77,6 +79,12 @@ class Typer(caller: Node) {
                 val c = gen_node_type(c_bn)
                 iter_nodes(bt)
                 DataType.Void
+            }
+            case Node.Match(c_bn, ls) => {
+                val c = gen_node_type(c_bn)
+                ls.map(_._1).map(gen_node_type)
+                ls.map(_._2).foreach(iter_nodes)
+                DataType.Any
             }
             case Node.While(c_bn, bt) => {
                 val c = gen_node_type(c_bn)
