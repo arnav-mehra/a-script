@@ -16,28 +16,28 @@ import pipeline.compiler.*
 
 object Runner {
     def run(code: String): Unit = {
-        val mcode: String = Minimizer.digest(code)
+        val minimized_code: String = Minimizer.digest(code)
 
-        val (root_fn: Node, root_caller: Node) = ProgramParser.parse(mcode)
+        val (root_fn: Node.Fn, root_caller: Node.Call) = ProgramParser.parse(minimized_code)
 
         Indexer.digest(root_fn)
         Typer.digest(root_caller)
-        
-        println(mcode); println()
-        println(root_fn); println()
-        Functions.data.foreach((n, f) => {
-            print(n + ": "); println(f.vars)
-        })
-        println()
-        Calls.data.forEach((n, c) => {
-            val Node.Call(f, _) = n: @unchecked
-            println(f + " -> " + c.ret_type)
-            println(c.var_types)
-            println()
-            c.node_types.forEach((a, b) => {println(a); println(b)})
-        })
 
-        println()
+        // println(minimized_code); println()
+        // println(root_fn); println()
+        // Functions.data.foreach((n, f) => {
+        //     print(n + ": "); println(f.vars)
+        // })
+        // println()
+        // Calls.data.forEach((n, c) => {
+        //     val Node.Call(f, _) = n: @unchecked
+        //     println(f + " -> " + c.ret_type)
+        //     println(c.var_types)
+        //     println()
+        //     c.node_types.forEach((a, b) => {println(a); println(b)})
+        // })
+        // println()
+
         Compiler.digest(root_caller)()
     }
 }

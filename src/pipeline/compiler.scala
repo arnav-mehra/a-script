@@ -61,7 +61,7 @@ class Compiler(caller: Node) {
         }
     }
 
-    def gen_ast_list(bt: Tree): AstList = {
+    def gen_ast_list(bt: Nodes): AstList = {
         bt.filter{
             case Node.Fn(_, _, _) => false
             case default => true

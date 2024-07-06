@@ -10,21 +10,21 @@ type Program = (() => Data)
 type Ast = (() => Data)
 type AstList = ArrayBuffer[Ast]
 
-type Tree = ArrayBuffer[Node]
+type Nodes = ArrayBuffer[Node]
 enum Node {
     // blocks
-    case If   (c: Node, bt: Tree)
-    case Match(v: Node, c_ls: ArrayBuffer[(Node, Tree)])
-    case While(c: Node, bt: Tree)
-    case ForTo(v: String, s: Node, e: Node, bt: Tree)
-    case ForIn(v: String, arr: Node, bt: Tree)
-    case Fn   (v: String, ps: ArrayBuffer[String], bt: Tree)
+    case If   (c: Node, bt: Nodes)
+    case Match(v: Node, c_ls: ArrayBuffer[(Node, Nodes)])
+    case While(c: Node, bt: Nodes)
+    case ForTo(v: String, s: Node, e: Node, bt: Nodes)
+    case ForIn(v: String, arr: Node, bt: Nodes)
+    case Fn   (v: String, ps: ArrayBuffer[String], bt: Nodes)
 
     // ops
     case Print(e: Node)
-    case Call (f: String, bt: Tree)
-    case Set  (v: String, fs: Tree, op: String, e: Node)
-    case Get  (v: String, fs: Tree)
+    case Call (f: String, bt: Nodes)
+    case Set  (v: String, fs: Nodes, op: String, e: Node)
+    case Get  (v: String, fs: Nodes)
     case BinOp(e1: Node, op: String, e2: Node)
     case Var  (v: String)
     case Const(e: Data)
@@ -33,7 +33,7 @@ enum Node {
 class Function(
     val n: String,
     val ps: ArrayBuffer[String],
-    val bt: Tree
+    val bt: Nodes
 ) {
     val vars = HashMap().addAll(ps.zipWithIndex)
 
@@ -92,7 +92,7 @@ object Env {
 object Functions {
     val data: HashMap[String, Function] = HashMap()
 
-    def add(n: String, ps: ArrayBuffer[String], bt: Tree) = {
+    def add(n: String, ps: ArrayBuffer[String], bt: Nodes) = {
         if (!data.contains(n)) {
             data(n) = Function(n, ps, bt)
         }
@@ -100,7 +100,7 @@ object Functions {
 }
 
 object Calls {
-    val data: IdentityHashMap[Node, Call] = IdentityHashMap()
+    val data: IdentityHashMap[Node.Call, Call] = IdentityHashMap()
 
     def has = data.containsKey
     def add = data.put

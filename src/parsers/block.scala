@@ -9,15 +9,15 @@ import types.data.*
 import parsers.line.LineParser
 
 object ProgramParser extends JavaTokenParsers {
-    def parse(code: String): (Node, Node) = {
-        val t: Tree = parseAll(program, code).get
+    def parse(code: String): (Node.Fn, Node.Call) = {
+        val t: Nodes = parseAll(program, code).get
         (
             Node.Fn("_", ArrayBuffer(), t),
             Node.Call("_", ArrayBuffer())
         )
     }
 
-    def program:Parser[Tree] = rep(node) ^^ (
+    def program:Parser[Nodes] = rep(node) ^^ (
         ls => ls.to(ArrayBuffer)
     )
 
@@ -32,7 +32,7 @@ object ProgramParser extends JavaTokenParsers {
         | for_block
         | match_block
 
-     def function_block:Parser[Node] = "fn~" ~ variable ~ param_list ~ block_core ^^ {
+    def function_block:Parser[Node] = "fn~" ~ variable ~ param_list ~ block_core ^^ {
         case "fn~"~v~ps~b => Node.Fn(v, ps, b)
     }
 
@@ -60,9 +60,9 @@ object ProgramParser extends JavaTokenParsers {
         case default => print("wtf"); Node.Const(Data.Number(0))
     }
 
-    def match_case:Parser[(Node, Tree)] = statement ~ ":" ~ block_core ^^ {
-        case s~":"~b => (s, b)
-    }
+    def match_case:Parser[(Node, Nodes)] = statement ~ "=>" ~ block_core ^^ (
+        s => (s._1._1, s._2)
+    )
 
     def for_block:Parser[Node] = "for~" ~ (for_in_block | for_to_block) ^^ (
         s => s._2
@@ -78,7 +78,7 @@ object ProgramParser extends JavaTokenParsers {
         case default => print("wtf"); Node.Const(Data.Number(0))
     }
 
-    def block_core:Parser[Tree] = "{" ~ program ~ "}" ^^ {
+    def block_core:Parser[Nodes] = "{" ~ program ~ "}" ^^ {
         case "{"~bt~"}" => bt
     }
 

@@ -10,9 +10,9 @@ import parsers.block.*
 import parsers.line.*
 
 object Typer {
-    def digest(caller: Node, pt: ArrayBuffer[DataType] = ArrayBuffer()): Call = {
+    def digest(caller: Node.Call, pt: ArrayBuffer[DataType] = ArrayBuffer()): Call = {
         if (!Calls.has(caller)) {
-            val Node.Call(fn_name, bt) = caller: @unchecked
+            val Node.Call(fn_name, bt) = caller
             val c = Call(fn_name, pt)
             Calls.add(caller, c)
             c.ret_type = Typer(caller).gen_ret_type
@@ -21,10 +21,9 @@ object Typer {
     }
 }
 
-class Typer(caller: Node) {
-    val Node.Call(fn_name, _) = caller: @unchecked
+class Typer(caller: Node.Call) {
     def call: Call = Calls.get(caller)
-    def fn: Function = Functions.data(fn_name)
+    def fn: Function = Functions.data(caller.f)
 
     def gen_ret_type: DataType = {
         val (bt_ls, bt_ret) = fn.bt.splitAt(fn.bt.length - 1)
@@ -32,7 +31,7 @@ class Typer(caller: Node) {
         gen_node_type(bt_ret(0))
     }
 
-    def iter_nodes(bt: Tree): Unit = {
+    def iter_nodes(bt: Nodes): Unit = {
         bt.foreach(gen_node_type)
     }
 
@@ -41,9 +40,9 @@ class Typer(caller: Node) {
             case Node.Fn(fn, ps, bt) => {
                 DataType.Void // fn declaration doesnt return anything.
             }
-            case Node.Call(fn, bt) => {
-                val pt: ArrayBuffer[DataType] = bt.map(gen_node_type)
-                val c = Typer.digest(bn, pt)
+            case bn_call: Node.Call => {
+                val pt: ArrayBuffer[DataType] = bn_call.bt.map(gen_node_type)
+                val c = Typer.digest(bn_call, pt)
                 c.ret_type
             }
             case Node.Print(e) => {

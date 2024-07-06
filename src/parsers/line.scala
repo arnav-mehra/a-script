@@ -31,54 +31,47 @@ object LineParser extends JavaTokenParsers {
 
     // GETTER / EVALUATOR
 
-    def formOpBlock(e1: Node, lst: List[String~Node]): Node = {
-        if (lst.length == 0) {
-            e1
-        } else {
-            lst.foldLeft(e1)((acc, t) => {
-                Node.BinOp(acc, t._1, t._2)
-            })
-        }
+    def nestBinOps(e1: Node, lst: List[String~Node]): Node = {
+        lst.foldLeft(e1)((acc, t) => Node.BinOp(acc, t._1, t._2))
     }
 
     def getter:Parser[Node] = expression ~ rep(("=="|"!="|"<="|">="|"<"|">") ~ expression) ^^ {
-        case e1~lst => formOpBlock(e1, lst)
+        case e1~lst => nestBinOps(e1, lst)
     }
 
     def expression:Parser[Node] = term ~ rep(("+"|"-") ~ term) ^^ {
-        case e1~lst => formOpBlock(e1, lst)
+        case e1~lst => nestBinOps(e1, lst)
     }
 
     def term:Parser[Node] = factor ~ rep(("*"|"/") ~ factor) ^^ {
-        case e1~lst => formOpBlock(e1, lst)
+        case e1~lst => nestBinOps(e1, lst)
     }
 
     def factor:Parser[Node] =
-        "(" ~ getter ~ ")" ^^ (x => x._1._2)
-        | literal          ^^ (s => Node.Const(s))
+        "(" ~ getter ~ ")" ^^ (s => s._1._2)
+        | literal          ^^ (x => Node.Const(x))
         | caller
         | accessor
 
     def accessor:Parser[Node] = variable ~ rep(field) ^^ {
         case v~ls => {
-            if (ls.length == 0) Node.Var(v)
-            else Node.Get(v, ls.to(ArrayBuffer))
+            ls.length match {
+                case 0 => Node.Var(v)
+                case _ => Node.Get(v, ls.to(ArrayBuffer))
+            }
         }
     }
 
     def field:Parser[Node] = "[" ~ getter ~ "]" ^^ (s => s._1._2)
 
-    def caller: Parser[Node] = variable ~ arg_list ^^ {
-        case v~bt => Node.Call(v, bt)
+    def caller: Parser[Node] = variable ~ "(" ~ arg_list ~ ")" ^^ {
+        case v~"("~bt~")" => Node.Call(v, bt)
     }
 
-    def arg_list: Parser[Tree] = 
-        "()" ^^ {s => ArrayBuffer()}
-        | "(" ~ getter ~ rep("," ~ getter) ~ ")" ^^ {
-            case "("~e1~ls~")" => {
-                ArrayBuffer(e1) ++ ls.map(s => s._2).to(ArrayBuffer)
-            }
-            case default => println("wtf"); ArrayBuffer()
+    def arg_list =
+        "" ^^ (_ => ArrayBuffer())
+        getter ~ rep("," ~ getter) ^^ {
+            case ent~ent_ls => ArrayBuffer(ent) ++ ent_ls.map(s => s._2).to(ArrayBuffer)
         }
 
     def variable: Parser[String] = "[a-zA-Z_][a-zA-Z_0-9]*".r
@@ -92,7 +85,7 @@ object LineParser extends JavaTokenParsers {
     def decimal: Parser[Data] = "\\d+\\.?\\d*".r ^^ {
         s => Data.Number(s.toDouble)
     }
-    
+
     def hex: Parser[Data] = "0x[0-9a-fA-F]*".r ^^ {
         s => Data.Number(Integer.parseInt(s.substring(2), 16))
     }
@@ -105,29 +98,31 @@ object LineParser extends JavaTokenParsers {
         case "\""~s~"\"" => Data.String(s)
     }
 
-    def array: Parser[Data] =
-        "[]" ^^ (_ => Data.Array(ArrayBuffer()))
-        | "[" ~ literal ~ rep("," ~ literal) ~ "]" ^^ {
-            case "["~n~lst~"]" => {
-                Data.Array(ArrayBuffer(n) ++ lst.map(p => p._2))
-            }
-            case default => println("wtf"); Data.Array(ArrayBuffer())
+    def array: Parser[Data] = "[" ~ array_ent_ls ~ "]" ^^ {
+        case "["~ent_ls~"]" => Data.Array(ent_ls)
+    }
+
+    def array_ent_ls: Parser[ArrayBuffer[Data]] =
+        "" ^^ (_ => ArrayBuffer())
+        | literal ~ rep("," ~ literal) ^^ {
+            case ent~ent_ls => ArrayBuffer(ent) ++ ent_ls.map(s => s._2).to(ArrayBuffer)
         }
 
-    def obj: Parser[Data] = 
-        "##" ^^ (_ => Data.Object(HashMap()))
-        | "#" ~ obj_ent ~ rep("," ~ obj_ent) ~ "#" ^^ {
-            case "#"~e1~els~"#" => {
-                val hm: HashMap[Data, Data] = HashMap()
-                hm(e1._1) = e1._2
-                els.foreach(p => hm(p._2._1) = p._2._2)
-                Data.Object(hm)
-            }
-            case default => println("wtf"); Data.Object(HashMap()) 
+    def obj: Parser[Data] = "#" ~ obj_ent_ls ~ "#" ^^ {
+        case "#"~ent_ls~"#" => Data.Object(ent_ls.to(HashMap))
+    }
+
+    def obj_ent_ls: Parser[ArrayBuffer[(Data, Data)]] = 
+        "" ^^ (_ => ArrayBuffer())
+        | obj_ent ~ rep("," ~ obj_ent) ^^ {
+            case ent~ent_ls => ArrayBuffer(ent) ++ ent_ls.map(s => s._2).to(ArrayBuffer)
         }
-    
+
     def obj_ent: Parser[(Data, Data)] = literal ~ ":" ~ literal ^^ {
         case l1~":"~l2 => (l1, l2)
-        case default => println("wtf"); (Data.Number(0), Data.Number(0)) 
+        case default => {
+            throw new java.lang.Exception("Error parsing object entry (this shouldn't happen)");
+            (Data.Number(0), Data.Number(0))
+        }
     }
 }
