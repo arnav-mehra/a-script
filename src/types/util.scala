@@ -1,139 +1,107 @@
 package types.util
 
-import scala.collection.mutable.HashMap
-import java.lang.{String => SString}
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
 
-type AST = (() => Data)
+import types.data.*
+import java.util.IdentityHashMap
 
-enum Data {
-    case Number(v: Double)
-    case String(v: SString)
-    case Array (v: ArrayBuffer[Data])
-    case Object(v: HashMap[Data, Data])
+type Program = (() => Data)
+type Ast = (() => Data)
+type AstList = ArrayBuffer[Ast]
 
-    // FIELD GETTERS & SETTERS
+type Nodes = ArrayBuffer[Node]
+enum Node {
+    // blocks
+    case If   (c: Node, bt: Nodes)
+    case Match(v: Node, c_ls: ArrayBuffer[(Node, Nodes)])
+    case While(c: Node, bt: Nodes)
+    case ForTo(v: String, s: Node, e: Node, bt: Nodes)
+    case ForIn(v: String, arr: Node, bt: Nodes)
+    case Fn   (v: String, ps: ArrayBuffer[String], bt: Nodes)
 
-    def ->(idx: Data): Data = {
-        (this, idx) match {
-            case (Array(v),  Number(i)) => v(i.toInt) 
-            case (String(v), Number(i)) => String(v.charAt(i.toInt).toString())
-            case (Object(v), _)         => v(idx)
-            case default => println("shit!"); this
+    // ops
+    case Print(e: Node)
+    case Call (f: String, bt: Nodes)
+    case Set  (v: Node.Get, op: String, e: Node)
+    case Get  (v: String, fs: Nodes)
+    case BinOp(e1: Node, op: String, e2: Node)
+    case Const(e: Data)
+}
+
+class Function(
+    val n: String,
+    val ps: ArrayBuffer[String],
+    val bt: Nodes
+) {
+    val vars = HashMap().addAll(ps.zipWithIndex)
+
+    def add_var(s: String) = {
+        if (!vars.contains(s)) {
+            vars(s) = vars.size
         }
     }
 
-    def set(idx: Data, x: Data) = {
-        (this, idx) match {
-            case (Array(v),  Number(i)) => v(i.toInt) = x
-            case (Object(v), _)         => v(idx) = x
-            case default => println("shit!"); this
+    def get_var(s: String) = vars(s)
+}
+
+class Call(
+    val fn_name: String,
+    val pt: ArrayBuffer[DataType] = ArrayBuffer()
+) {
+    def fn: Function = Functions.data(fn_name)
+
+    val var_types = HashMap().addAll(fn.ps.zipWithIndex.map(v => (v._1, pt(v._2))))
+    val node_types = IdentityHashMap[Node, DataType]()
+    var ret_type = DataType.Any
+
+    def set_node_type(n: Node, dt: DataType) = {
+        node_types.put(n, dt)
+    }
+
+    def add_var_type(s: String, dt: DataType) = {
+        if (var_types.contains(s) && var_types(s).assignable(dt)) {
+            println("Cannot reassign " + s + " to type " + dt.str);
+        }
+        var_types(s) = dt
+    }
+
+    def get_var_type(s: String) = {
+        if (!var_types.contains(s)) {
+            var_types(s) = DataType.Any
+        }
+        var_types(s)
+    }
+}
+
+object Env {
+    val stack = ArrayBuffer.fill(1000)(Data.Number(0))
+    var stack_ptr = 0
+
+    inline def get_var(offset: Int): Data = {
+        stack(stack_ptr + offset)
+    }
+
+    inline def set_var(offset: Int, new_val: Data): Data = {
+        stack(stack_ptr + offset) = new_val
+        new_val
+    }
+}
+
+object Functions {
+    val data: HashMap[String, Function] = HashMap()
+
+    def add(n: String, ps: ArrayBuffer[String], bt: Nodes) = {
+        if (!data.contains(n)) {
+            data(n) = Function(n, ps, bt)
         }
     }
+}
 
-    // MATH OPS
+object Calls {
+    val data: IdentityHashMap[Node.Call, Call] = IdentityHashMap()
 
-    def +=(op2: Data): Unit = {
-        (this, op2) match {
-            case (String(v1), String(v2)) => v1 ++: v2
-            case (String(v1), Number(v2)) => v1 ++: v2.toString()
-            case (Array(v1),  Array(v2) ) => v1.appendAll(v2)
-            case (Array(v1),  _)          => v1.append(op2)
-            case (Object(v1), Object(v2)) => v1 ++= v2
-            case (Object(v1), Array(v2) ) => v1(v2(0)) = v2(1)
-            case default => println("shit!")
-        }
-    }
-
-    def +(op2: Data): Data = {
-        (this, op2) match {
-            case (Number(v1), Number(v2)) => Data.Number(v1 + v2)
-            case (String(v1), String(v2)) => String(v1 + v2)
-            case (Array(v1),  Array(v2) ) => Array(v1 ++ v2)
-            case (Object(v1), Object(v2)) => Object(v1 ++ v2)
-            
-            case (Number(v1), String(v2)) => String(v1.toString() + v2)
-            case (Object(v1), String(v2)) => String(v1.toString() + v2)
-            case (Array(v1),  String(v2)) => String(v1.toString() + v2)
-            case (String(v1), Number(v2)) => String(v1 + v2.toString())
-            case (String(v1), Object(v2)) => String(v1 + v2.toString())
-            case (String(v1), Array(v2))  => String(v1 + v2.toString())
-
-            case default => println("shit!"); this
-        }
-    }
-
-    def -(op2: Data): Data = {
-        (this, op2) match {
-            case (Number(v1), Number(v2)) => Number(v1 - v2)
-            case default => println("shit!"); this
-        }
-    }
-
-    def *(op2: Data): Data = {
-        (this, op2) match {
-            case (Number(v1), Number(v2)) => Number(v1 * v2)
-            case default => println("shit!"); this
-        }
-    }
-
-    def /(op2: Data): Data = {
-        (this, op2) match {
-            case (Number(v1), Number(v2)) => Number(v1 / v2)
-            case default => println("shit!"); this
-        }
-    }
-
-    // COMPARISON
-
-    def ==(op2: Data): Data = _from_antibool(_equals(op2))
-    def !=(op2: Data): Data = _from_antibool(_equals(op2))
-    def  <(op2: Data): Data = _from_bool(_less_than(op2))
-    def >=(op2: Data): Data = _from_antibool(_less_than(op2))
-    def <=(op2: Data): Data = _from_bool(_less_than(op2) || _equals(op2))
-    def  >(op2: Data): Data = _from_antibool(_less_than(op2) || _equals(op2))
-
-    // HELPERS
-
-    def _from_bool(b: Boolean): Data = {
-        Data.Number(if (b) 1 else 0)
-    }
-
-    def _from_antibool(b: Boolean): Data = {
-        Data.Number(if (b) 0 else 1)
-    }
-
-    def _less_than(op2: Data): Boolean = {
-        (this, op2) match {
-            case (Number(v1), Number(v2)) => v1 < v2
-            case (String(v1), String(v2)) => v1 < v2
-            case (Array(v1),  Array(v2) ) => v1.length < v2.length
-            case (Object(v1), Object(v2)) => v1.size < v2.size
-            case default => println("shit!"); false
-        }
-    }
-
-    def _equals(op2: Data): Boolean = {
-        (this, op2) match {
-            case (Number(v1), Number(v2)) => v1 == v2
-            case (String(v1), String(v2)) => v1 == v2
-            case (Array(v1),  Array(v2) ) => {
-                v1.zip(v2).foldLeft(false)((acc, p) => acc || (p._1 == p._2))
-            }
-            case (Object(v1), Object(v2)) => {
-                ((v1.keySet -- v2.keySet).size == 0)
-                    && ((v2.keySet -- v1.keySet).size == 0)
-            }
-            case default => println("shit!"); false
-        }
-    }
-
-    def _is_truthy = {
-        this match {
-            case Number(v) => v != 0
-            case Array(v)  => v.length != 0
-            case Object(v) => v.size != 0
-            case String(v) => v.length() != 0
-        }
-    }
+    def has = data.containsKey
+    def add = data.put
+    def get = data.get
 }
