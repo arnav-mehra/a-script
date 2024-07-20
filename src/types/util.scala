@@ -23,10 +23,9 @@ enum Node {
     // ops
     case Print(e: Node)
     case Call (f: String, bt: Nodes)
-    case Set  (v: String, fs: Nodes, op: String, e: Node)
+    case Set  (v: Node.Get, op: String, e: Node)
     case Get  (v: String, fs: Nodes)
     case BinOp(e1: Node, op: String, e2: Node)
-    case Var  (v: String)
     case Const(e: Data)
 }
 
@@ -55,7 +54,6 @@ class Call(
     val var_types = HashMap().addAll(fn.ps.zipWithIndex.map(v => (v._1, pt(v._2))))
     val node_types = IdentityHashMap[Node, DataType]()
     var ret_type = DataType.Any
-    val program: Program = (() => Data.Number(0))
 
     def set_node_type(n: Node, dt: DataType) = {
         node_types.put(n, dt)
@@ -80,12 +78,13 @@ object Env {
     val stack = ArrayBuffer.fill(1000)(Data.Number(0))
     var stack_ptr = 0
 
-    def get_var(i: Int): Data = {
-        return stack(stack_ptr + i)
+    inline def get_var(offset: Int): Data = {
+        stack(stack_ptr + offset)
     }
 
-    def set_var(i: Int, d: Data) = {
-        stack(stack_ptr + i) = d
+    inline def set_var(offset: Int, new_val: Data): Data = {
+        stack(stack_ptr + offset) = new_val
+        new_val
     }
 }
 

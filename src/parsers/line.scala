@@ -13,23 +13,11 @@ object LineParser extends JavaTokenParsers {
         parseAll(line, ln).get
     }
 
-    def line:Parser[Node] = printer | setter | getter
+    def line:Parser[Node] = setter
 
-    // PRINTER
-
-    def printer:Parser[Node] = getter ~ "!" ^^ (
-        s => Node.Print(s._1)
-    )
-
-    // SETTER / MUTATOR
-
-    def setter:Parser[Node] = 
-        variable ~ rep(field) ~ ("="|"+="|"-="|"*="|"/=") ~ getter
-    ^^ {
-        case v~ls~op~e => Node.Set(v, ls.to(ArrayBuffer), op, e)
+    def setter:Parser[Node] = rep(accessor ~ ("="|"+="|"-="|"*="|"/=")) ~ getter ^^ {
+        case lst~e1 => lst.foldRight(e1)((v, acc) => Node.Set(v._1, v._2, acc))
     }
-
-    // GETTER / EVALUATOR
 
     def nestBinOps(e1: Node, lst: List[String~Node]): Node = {
         lst.foldLeft(e1)((acc, t) => Node.BinOp(acc, t._1, t._2))
@@ -43,28 +31,30 @@ object LineParser extends JavaTokenParsers {
         case e1~lst => nestBinOps(e1, lst)
     }
 
-    def term:Parser[Node] = factor ~ rep(("*"|"/") ~ factor) ^^ {
+    def term:Parser[Node] = printable_factor ~ rep(("*"|"/") ~ printable_factor) ^^ {
         case e1~lst => nestBinOps(e1, lst)
     }
 
+    def printable_factor:Parser[Node] = factor ~ opt("!") ^^ {
+        case f~Some(x) => Node.Print(f)
+        case f~None => f
+    }
+
     def factor:Parser[Node] =
-        "(" ~ getter ~ ")" ^^ (s => s._1._2)
+        "(" ~ setter ~ ")" ^^ (s => s._1._2)
         | literal          ^^ (x => Node.Const(x))
         | caller
         | accessor
 
-    def accessor:Parser[Node] = variable ~ rep(field) ^^ {
-        case v~ls => {
-            ls.length match {
-                case 0 => Node.Var(v)
-                case _ => Node.Get(v, ls.to(ArrayBuffer))
-            }
-        }
+    def accessor:Parser[Node.Get] = variable ~ rep(field) ^^ {
+        case v~ls => Node.Get(v, ls.to(ArrayBuffer))
     }
+
+    def variable: Parser[String] = "[a-zA-Z_][a-zA-Z_0-9]*".r
 
     def field:Parser[Node] = "[" ~ getter ~ "]" ^^ (s => s._1._2)
 
-    def caller: Parser[Node] = variable ~ "(" ~ arg_list ~ ")" ^^ {
+    def caller: Parser[Node.Call] = variable ~ "(" ~ arg_list ~ ")" ^^ {
         case v~"("~bt~")" => Node.Call(v, bt)
     }
 
@@ -73,8 +63,6 @@ object LineParser extends JavaTokenParsers {
         getter ~ rep("," ~ getter) ^^ {
             case ent~ent_ls => ArrayBuffer(ent) ++ ent_ls.map(s => s._2).to(ArrayBuffer)
         }
-
-    def variable: Parser[String] = "[a-zA-Z_][a-zA-Z_0-9]*".r
 
     // LITERALS
 
@@ -102,21 +90,19 @@ object LineParser extends JavaTokenParsers {
         case "["~ent_ls~"]" => Data.Array(ent_ls)
     }
 
-    def array_ent_ls: Parser[ArrayBuffer[Data]] =
-        "" ^^ (_ => ArrayBuffer())
-        | literal ~ rep("," ~ literal) ^^ {
-            case ent~ent_ls => ArrayBuffer(ent) ++ ent_ls.map(s => s._2).to(ArrayBuffer)
-        }
+    def array_ent_ls: Parser[ArrayBuffer[Data]] = opt(literal ~ rep("," ~ literal)) ^^ {
+        case None => ArrayBuffer()
+        case Some(ent~ent_ls) => ArrayBuffer(ent) ++ ent_ls.map(s => s._2).to(ArrayBuffer)
+    }
 
     def obj: Parser[Data] = "#" ~ obj_ent_ls ~ "#" ^^ {
         case "#"~ent_ls~"#" => Data.Object(ent_ls.to(HashMap))
     }
 
-    def obj_ent_ls: Parser[ArrayBuffer[(Data, Data)]] = 
-        "" ^^ (_ => ArrayBuffer())
-        | obj_ent ~ rep("," ~ obj_ent) ^^ {
-            case ent~ent_ls => ArrayBuffer(ent) ++ ent_ls.map(s => s._2).to(ArrayBuffer)
-        }
+    def obj_ent_ls: Parser[ArrayBuffer[(Data, Data)]] = opt(obj_ent ~ rep("," ~ obj_ent)) ^^ {
+        case None => ArrayBuffer()
+        case Some(ent~ent_ls) => ArrayBuffer(ent) ++ ent_ls.map(s => s._2).to(ArrayBuffer)
+    }
 
     def obj_ent: Parser[(Data, Data)] = literal ~ ":" ~ literal ^^ {
         case l1~":"~l2 => (l1, l2)

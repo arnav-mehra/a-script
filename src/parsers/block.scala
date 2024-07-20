@@ -60,7 +60,7 @@ object ProgramParser extends JavaTokenParsers {
         case default => print("wtf"); Node.Const(Data.Number(0))
     }
 
-    def match_case:Parser[(Node, Nodes)] = statement ~ "=>" ~ block_core ^^ (
+    def match_case:Parser[(Node, Nodes)] = statement ~ ":" ~ block_core ^^ (
         s => (s._1._1, s._2)
     )
 

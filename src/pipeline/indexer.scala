@@ -25,7 +25,7 @@ class Indexer(val fn_name: String) {
     def iter_node(bn: Node): Unit = {
         bn match {
             case bn_fn: Node.Fn          => Indexer.digest(bn_fn)
-            case Node.Set(v, fs, _, _)   => if (fs.length == 0) fn.add_var(v)
+            case Node.Set(getter, _, _)   => if (getter.fs.length == 0) fn.add_var(getter.v)
             case Node.If(_, bt)          => iter_tree(bt)
             case Node.While(_, bt)       => iter_tree(bt)
             case Node.ForIn(v, _, bt)    => fn.add_var(v); iter_tree(bt)

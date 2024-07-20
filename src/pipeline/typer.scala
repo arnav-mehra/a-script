@@ -46,26 +46,23 @@ class Typer(caller: Node.Call) {
                 c.ret_type
             }
             case Node.Print(e) => {
-                val dt: DataType = gen_node_type(e)
-                if (dt.is_void) println("Unable to print void expression")
-                DataType.Void
+                gen_node_type(e)
             }
-            case Node.Var(v)   => {
+            case Node.Const(n) => {
+                n.get_type()
+            }
+            case Node.Get(v, fs_bt) if fs_bt.length == 0 => {
+                iter_nodes(fs_bt)
                 call.get_var_type(v)
             }
-            case Node.Const(n) => n.get_type()
             case Node.Get(v, fs_bt) => {
                 iter_nodes(fs_bt)
-                if (fs_bt.length == 0) {
-                    call.get_var_type(v)
-                } else {
-                    DataType.Any
-                }
+                DataType.Any
             }
-            case Node.Set(v, fs_bt, op, e_bn) => {
+            case Node.Set(getter, op, e_bn) => {
                 val et: DataType = gen_node_type(e_bn)
-                if (op == "=" && fs_bt.length == 0) { // var assignment 
-                    call.add_var_type(v, et)
+                if (op == "=" && getter.fs.length == 0) { // var assignment 
+                    call.add_var_type(getter.v, et)
                 }
                 et
             }
@@ -77,7 +74,7 @@ class Typer(caller: Node.Call) {
             case Node.If(c_bn, bt) => {
                 val c = gen_node_type(c_bn)
                 iter_nodes(bt)
-                DataType.Void
+                DataType.Any
             }
             case Node.Match(c_bn, ls) => {
                 val c = gen_node_type(c_bn)
@@ -105,6 +102,7 @@ class Typer(caller: Node.Call) {
                 DataType.Void
             }
         }
+
         call.set_node_type(bn, tp)
         tp
     }   
