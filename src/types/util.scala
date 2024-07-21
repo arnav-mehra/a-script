@@ -6,19 +6,18 @@ import scala.collection.mutable.HashMap
 import types.data.*
 import java.util.IdentityHashMap
 
-type Program = (() => Data)
 type Ast = (() => Data)
 type AstList = ArrayBuffer[Ast]
 
 type Nodes = ArrayBuffer[Node]
 enum Node {
     // blocks
-    case If   (c: Node, bt: Nodes)
-    case Match(v: Node, c_ls: ArrayBuffer[(Node, Nodes)])
-    case While(c: Node, bt: Nodes)
-    case ForTo(v: String, s: Node, e: Node, bt: Nodes)
-    case ForIn(v: String, arr: Node, bt: Nodes)
-    case Fn   (v: String, ps: ArrayBuffer[String], bt: Nodes)
+    case Match(v: Node, c_ls: ArrayBuffer[(Node, Node)])
+    case While(c: Node, block: Node.Block)
+    case ForTo(v: String, s: Node, e: Node, block: Node.Block)
+    case ForIn(v: String, arr: Node, block: Node.Block)
+    case Fn   (v: String, ps: ArrayBuffer[String], block: Node.Block)
+    case Block(lines: ArrayBuffer[Node])
 
     // ops
     case Print(e: Node)
@@ -32,7 +31,7 @@ enum Node {
 class Function(
     val n: String,
     val ps: ArrayBuffer[String],
-    val bt: Nodes
+    val bt: Node.Block
 ) {
     val vars = HashMap().addAll(ps.zipWithIndex)
 
@@ -91,9 +90,9 @@ object Env {
 object Functions {
     val data: HashMap[String, Function] = HashMap()
 
-    def add(n: String, ps: ArrayBuffer[String], bt: Nodes) = {
-        if (!data.contains(n)) {
-            data(n) = Function(n, ps, bt)
+    def add(fn_name: String, param_names: ArrayBuffer[String], block: Node.Block) = {
+        if (!data.contains(fn_name)) {
+            data(fn_name) = Function(fn_name, param_names, block)
         }
     }
 }

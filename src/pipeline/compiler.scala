@@ -13,7 +13,7 @@ import types.ops.*
 // Follows "compiling" to closures strategy.
 
 object Compiler {
-    val cache = IdentityHashMap[Node, Program]()
+    val cache = IdentityHashMap[Node, Ast]()
 
     def digest(caller: Node): Ast = {
         Compiler(caller).gen_caller()
@@ -42,23 +42,16 @@ class Compiler(caller: Node) {
         }
     }
 
-    def gen_function_cached: Program = {
+    def gen_function_cached: Ast = {
         if (!Compiler.cache.containsKey(caller)) {
-            val p: Program = Compiler(caller).gen_function
+            val p: Ast = Compiler(caller).gen_function
             Compiler.cache.put(caller, p)
         }
         Compiler.cache.get(caller)
     }
 
-    def gen_function: Program = {
-        val ast_ls: AstList = gen_ast_list(fn.bt)
-        val (ls, ret_ls) = ast_ls.splitAt(ast_ls.length - 1)
-        val ret = ret_ls(0)
-
-        () => {
-            ls.foreach(ast => ast())
-            ret()
-        }
+    def gen_function: Ast = {
+        gen_ast(fn.bt)
     }
 
     def gen_ast_list(bt: Nodes): AstList = {
@@ -154,54 +147,46 @@ class Compiler(caller: Node) {
                 val e2t: DataType = call.node_types.get(e2_bn)
                 Ops.binop(op, e1t, e2t, e1, e2)
             }
-            case Node.If(c_bn, bt) => {
-                val condition: Ast = gen_ast(c_bn)
-                val block: AstList = gen_ast_list(bt)
-                () => {
-                    if (condition()._is_truthy) block.map(a => a()).last
-                    else Data.Number(0)
-                }
+            case Node.Block(nodes) => {
+                val block_asts = gen_ast_list(nodes)
+                () => block_asts.map(ast => ast()).last
             }
             case Node.Match(s_bn, ls) => {
                 val s: Ast = gen_ast(s_bn)
-                val c_ls: ArrayBuffer[Ast] = ls.map(_._1).map(gen_ast)
-                val b_ls: ArrayBuffer[AstList] = ls.map(_._2).map(gen_ast_list)
-                val cb_ls: ArrayBuffer[(Ast, AstList)] = c_ls.zip(b_ls)
+                val cb_ls: ArrayBuffer[(Ast, Ast)] = ls.map(p => (gen_ast(p._1), gen_ast(p._2)))
                 () => {
                     val v: Data = s()
                     val res = cb_ls.find((c, b) => v == c())
                     res match {
-                        case Some(_: Ast, block: AstList) => {
-                            block.map(s => s()).last
-                        }
-                        case None => {
-                            Data.Number(0)
-                        }
+                        case Some(_: Ast, ast: Ast) => ast()
+                        case None => Data.Number(0)
                     }
                 }
             }
             case Node.While(c_bn, bt) => {
                 val c = gen_ast(c_bn)
-                val b = gen_ast_list(bt)
+                val b = gen_ast(bt)
                 () => {
-                    while (c()._is_truthy) b.foreach(a => a())
+                    while (c()._is_truthy) b()
                     Data.Number(0)
                 }
             }
             case Node.ForIn(v, e_bn, bt) => {
                 val vi = fn.get_var(v)
                 val e = gen_ast(e_bn)
-                val b = gen_ast_list(bt)
+                val b = gen_ast(bt)
                 () => {
                     val varr: Data = e()
                     varr match {
                         case Data.Array(arr) => {
                             for (x <- arr) {
                                 Env.set_var(vi, x)
-                                b.foreach(a => a())
+                                b()
                             }
                         }
-                        case default => println("wtf")
+                        case _ => {
+                            throw Exception("Type Error: Cannot iterate over non-array values.")
+                        }
                     }
                     varr
                 }
@@ -210,13 +195,13 @@ class Compiler(caller: Node) {
                 val vi = fn.get_var(v)
                 val e1 = gen_ast(e1_bn)
                 val e2 = gen_ast(e2_bn)
-                val b = gen_ast_list(bt)
+                val b = gen_ast(bt)
                 () => {
                     val Data.Number(ve1) = e1(): @unchecked
                     val Data.Number(ve2) = e2(): @unchecked
                     for (x <- ve1.toInt to ve2.toInt) {
                         Env.set_var(vi, Data.Number(x))
-                        b.foreach(a => a())
+                        b()
                     }
                     Data.Number(0)
                 }

@@ -59,7 +59,7 @@ object Ops {
                 () => e1() + e2()
             }
             case default => {
-                throw Exception("Unimplemented binary operation")
+                throw Exception("Compile-time error. Unimplemented binary operation.")
                 () => Data.Number(0)
             }
         }

@@ -9,15 +9,15 @@ import types.data.*
 
 object ProgramParser extends JavaTokenParsers {
     def parse(code: String): (Node.Fn, Node.Call) = {
-        val t: Nodes = parseAll(program, code).get
+        val t: Node.Block = parseAll(program, code).get
         (
             Node.Fn("_", ArrayBuffer(), t),
             Node.Call("_", ArrayBuffer())
         )
     }
 
-    def program:Parser[Nodes] = rep(node) ^^ (
-        ls => ls.to(ArrayBuffer)
+    def program:Parser[Node.Block] = rep(node) ^^ (
+        ls => Node.Block(ls.to(ArrayBuffer))
     )
 
     def node:Parser[Node] = line | block
@@ -27,7 +27,6 @@ object ProgramParser extends JavaTokenParsers {
     def block:Parser[Node] = 
         function_block
         | while_block
-        | if_block
         | for_block
         | match_block
 
@@ -38,28 +37,21 @@ object ProgramParser extends JavaTokenParsers {
     def param_list: Parser[ArrayBuffer[String]] = 
         "()" ^^ {s => ArrayBuffer()}
         | "(" ~ variable ~ rep("," ~ variable) ~ ")" ^^ {
-            case "("~v~ls~")" => {
-                ArrayBuffer(v) ++ ls.map(s => s._2).to(ArrayBuffer)
-            }
-            case default => println("wtf"); ArrayBuffer()
+            case "("~v~ls~")" => ArrayBuffer(v) ++ ls.map(s => s._2).to(ArrayBuffer)
+            case _ => throw Exception("Parsing Error: Invalid parameter list.")
         }
 
-    def while_block:Parser[Node] = "while~" ~ statement ~ block_core ^^ {
+    def while_block:Parser[Node.While] = "while~" ~ statement ~ block_core ^^ {
         case "while~"~c~bt => Node.While(c, bt)
-        case default => print("wtf"); Node.Const(Data.Number(0))
+        case _ => throw Exception("Parsing Error: Invalid while loop.")
     }
 
-    def if_block:Parser[Node] = "if~" ~ statement ~ block_core ^^ {
-        case "if~"~c~bt => Node.If(c, bt)
-        case default => print("wtf"); Node.Const(Data.Number(0))
-    }
-
-    def match_block:Parser[Node] = "match~" ~ statement ~ "{" ~ rep(match_case) ~ "}" ^^ {
+    def match_block:Parser[Node.Match] = "match~" ~ statement ~ "{" ~ rep(match_case) ~ "}" ^^ {
         case "match~"~s~"{"~ls~"}" => Node.Match(s, ls.to(ArrayBuffer))
-        case default => print("wtf"); Node.Const(Data.Number(0))
+        case _ => throw Exception("Parsing Error: Invalid match statement.")
     }
 
-    def match_case:Parser[(Node, Nodes)] = statement ~ "=>" ~ block_core ^^ (
+    def match_case:Parser[(Node, Node)] = statement ~ "=>" ~ (block_core | statement) ^^ (
         s => (s._1._1, s._2)
     )
 
@@ -67,17 +59,17 @@ object ProgramParser extends JavaTokenParsers {
         s => s._2
     )
 
-    def for_in_block:Parser[Node] = variable ~ ":" ~ statement ~ block_core ^^ {
+    def for_in_block:Parser[Node.ForIn] = variable ~ ":" ~ statement ~ block_core ^^ {
         case v~":"~arr~bt => Node.ForIn(v, arr, bt)
-        case default => print("wtf"); Node.Const(Data.Number(0))
+        case _ => throw Exception("Parsing Error: Invalid for in block.")
     }
 
-    def for_to_block:Parser[Node] = variable ~ ":" ~ statement ~ "~to~" ~ statement ~ block_core ^^ {
+    def for_to_block:Parser[Node.ForTo] = variable ~ ":" ~ statement ~ "~to~" ~ statement ~ block_core ^^ {
         case v~":"~s~"~to~"~e~bt => Node.ForTo(v, s, e, bt)
-        case default => print("wtf"); Node.Const(Data.Number(0))
+        case _ => throw Exception("Parsing Error: Invalid for to block.")
     }
 
-    def block_core:Parser[Nodes] = "{" ~ program ~ "}" ^^ {
+    def block_core:Parser[Node.Block] = "{" ~ program ~ "}" ^^ {
         case "{"~bt~"}" => bt
     }
 
@@ -114,6 +106,8 @@ object ProgramParser extends JavaTokenParsers {
 
     def factor:Parser[Node] =
         "(" ~ setter ~ ")" ^^ (s => s._1._2)
+        | match_block
+        // | if_block
         | literal          ^^ (x => Node.Const(x))
         | caller
         | accessor
@@ -130,7 +124,7 @@ object ProgramParser extends JavaTokenParsers {
         case v~"("~bt~")" => Node.Call(v, bt)
     }
 
-    def arg_list =
+    def arg_list: Parser[ArrayBuffer[Node]] =
         "" ^^ (_ => ArrayBuffer())
         getter ~ rep("," ~ getter) ^^ {
             case ent~ent_ls => ArrayBuffer(ent) ++ ent_ls.map(s => s._2).to(ArrayBuffer)
@@ -140,25 +134,25 @@ object ProgramParser extends JavaTokenParsers {
 
     def literal: Parser[Data] = number | array | string | obj
 
-    def number: Parser[Data] = hex | binary | decimal
+    def number: Parser[Data.Number] = hex | binary | decimal
 
-    def decimal: Parser[Data] = "\\d+\\.?\\d*".r ^^ {
+    def decimal: Parser[Data.Number] = "\\d+\\.?\\d*".r ^^ {
         s => Data.Number(s.toDouble)
     }
 
-    def hex: Parser[Data] = "0x[0-9a-fA-F]*".r ^^ {
+    def hex: Parser[Data.Number] = "0x[0-9a-fA-F]*".r ^^ {
         s => Data.Number(Integer.parseInt(s.substring(2), 16))
     }
 
-    def binary: Parser[Data] = "0b(0|1)*".r ^^ {
+    def binary: Parser[Data.Number] = "0b(0|1)*".r ^^ {
         s => Data.Number(Integer.parseInt(s.substring(2), 2))
     }
 
-    def string: Parser[Data] = "\"" ~ "[^\"]*".r ~ "\"" ^^ {
+    def string: Parser[Data.String] = "\"" ~ "[^\"]*".r ~ "\"" ^^ {
         case "\""~s~"\"" => Data.String(s)
     }
 
-    def array: Parser[Data] = "[" ~ array_ent_ls ~ "]" ^^ {
+    def array: Parser[Data.Array] = "[" ~ array_ent_ls ~ "]" ^^ {
         case "["~ent_ls~"]" => Data.Array(ent_ls)
     }
 
@@ -167,7 +161,7 @@ object ProgramParser extends JavaTokenParsers {
         case Some(ent~ent_ls) => ArrayBuffer(ent) ++ ent_ls.map(s => s._2).to(ArrayBuffer)
     }
 
-    def obj: Parser[Data] = "#" ~ obj_ent_ls ~ "#" ^^ {
+    def obj: Parser[Data.Object] = "#" ~ obj_ent_ls ~ "#" ^^ {
         case "#"~ent_ls~"#" => Data.Object(ent_ls.to(HashMap))
     }
 

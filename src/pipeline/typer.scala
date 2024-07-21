@@ -26,9 +26,7 @@ class Typer(caller: Node.Call) {
     def fn: Function = Functions.data(caller.f)
 
     def gen_ret_type: DataType = {
-        val (bt_ls, bt_ret) = fn.bt.splitAt(fn.bt.length - 1)
-        iter_nodes(bt_ls)
-        gen_node_type(bt_ret(0))
+        gen_node_type(fn.bt)
     }
 
     def iter_nodes(bt: Nodes): Unit = {
@@ -52,7 +50,6 @@ class Typer(caller: Node.Call) {
                 n.get_type()
             }
             case Node.Get(v, fs_bt) if fs_bt.length == 0 => {
-                iter_nodes(fs_bt)
                 call.get_var_type(v)
             }
             case Node.Get(v, fs_bt) => {
@@ -71,35 +68,35 @@ class Typer(caller: Node.Call) {
                 val e2t: DataType = gen_node_type(e2_bn)
                 e1t.binOp(op, e2t)
             }
-            case Node.If(c_bn, bt) => {
-                val c = gen_node_type(c_bn)
-                iter_nodes(bt)
-                DataType.Any
-            }
             case Node.Match(c_bn, ls) => {
                 val c = gen_node_type(c_bn)
-                ls.map(_._1).map(gen_node_type)
-                ls.map(_._2).foreach(iter_nodes)
+                ls.map(_._1).foreach(gen_node_type)
+                ls.map(_._2).foreach(gen_node_type)
                 DataType.Any
             }
-            case Node.While(c_bn, bt) => {
+            case Node.While(c_bn, block) => {
                 val c = gen_node_type(c_bn)
-                iter_nodes(bt)
+                gen_node_type(block)
                 DataType.Void
             }
-            case Node.ForIn(v, e_bn, bt) => {
+            case Node.ForIn(v, e_bn, block) => {
                 call.add_var_type(v, DataType.Any)
                 val e = gen_node_type(e_bn)
                 if (!e.is_iterable) println("Cannot iterate over type " + e.str)
-                iter_nodes(bt)
+                gen_node_type(block)
                 DataType.Void
             }
-            case Node.ForTo(v, e1_bn, e2_bn, bt) => {
+            case Node.ForTo(v, e1_bn, e2_bn, block) => {
                 call.add_var_type(v, DataType.Number)
                 val e1 = gen_node_type(e1_bn)
                 val e2 = gen_node_type(e2_bn)
-                iter_nodes(bt)
+                gen_node_type(block)
                 DataType.Void
+            }
+            case Node.Block(lines) => {
+                val (bt_ls, bt_ret) = lines.splitAt(lines.length - 1)
+                iter_nodes(bt_ls)
+                gen_node_type(bt_ret(0))
             }
         }
 
