@@ -6,8 +6,8 @@ import scala.collection.mutable.HashSet
 
 import types.util.*
 import types.data.*
-import parsers.block.*
-import parsers.line.*
+
+import pipeline.parser.*
 
 object Typer {
     def digest(caller: Node.Call, pt: ArrayBuffer[DataType] = ArrayBuffer()): Call = {

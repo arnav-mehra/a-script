@@ -6,9 +6,8 @@ import scala.collection.mutable.HashSet
 
 import types.util.*
 import types.data.*
-import parsers.block.*
-import parsers.line.*
 
+import pipeline.parser.*
 import pipeline.minimizer.* 
 import pipeline.indexer.*
 import pipeline.typer.*
