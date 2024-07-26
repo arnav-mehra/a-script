@@ -5,64 +5,81 @@ import scala.collection.mutable.ArrayBuffer
 import java.lang.{String => SString}
 
 enum DataType {
-    case Number, String, Array, Object, Any, Void
+    case Number, String, Array, Object, Type, Any, Void
 
     def binOp(op: String, v2: DataType): DataType = {
         op match {
-            case "+" => {
-                (this, v2) match {
-                    case (Number, Number) => Number
-                    case (String, String) => String
-                    case (Array,  Array)  => Array
-                    case (Object, Object) => Object
-                    
-                    case (Object, Array)  => Object
-                    case (Array, Object)  => Array
-        
-                    case (Array,  String) => Array
-                    case (Number, String) => String
-                    case (Object, String) => String
-                    case (String, Number) => String
-                    case (String, Object) => String
-                    case (String, Array)  => String
+            case "+" => this + v2
+            case _ => Number
+        }
+    }
 
-                    case (Any, _) => Any
-                    case (_, Any) => Any
-                    case (Void, _) => println("Cannot perform operation with void type."); Any
-                    case (_, Void) => println("Cannot perform operation with void type."); Any
+    def +(op2: DataType): DataType = {
+        (this, op2) match {
+            case (Number, Number) => Number
+            case (String, String) => String
+            case (Array,  Array ) => Array
+            case (Object, Object) => Object
+            case (Type,   Type  ) => Type
 
-                    case default => Number
-                }
-            }
-            case default => Number
+            case (Object, Array ) => Object
+            case (Array,  Object) => Array
+            case (Array,  String) => Array
+
+            case (Number, String) => String
+            case (Object, String) => String
+            case (String, Number) => String
+            case (String, Object) => String
+            case (String, Array ) => String
+
+            case (Void,   _     ) => throw Exception("Type Error: Invalid + operation.")
+            case (_,      Void  ) => throw Exception("Type Error: Invalid + operation.")
+            case (Any,    _     ) => Any
+            case (_,      Any   ) => Any
+
+            case _ => throw Exception("Type Error: Invalid + operation.")
+        }
+    }
+
+    def -(op2: DataType): DataType = {
+        (this, op2) match {
+            case (Number, Number) => Number
+            case _ => throw Exception("Type Error: Invalid - operation.")
+        }
+    }
+
+    def *(op2: DataType): DataType = {
+        (this, op2) match {
+            case (Number, Number) => Number
+            case _ => throw Exception("Type Error: Invalid * operation.")
+        }
+    }
+
+    def /(op2: DataType): DataType = {
+        (this, op2) match {
+            case (Number, Number) => Number
+            case _ => throw Exception("Type Error: Invalid / operation.")
         }
     }
 
     def is_iterable: Boolean = {
         this match {
-            case Any | Array => true
+            case Any | Array | Object => true
             case default => false
         }
     }
 
     def is_void: Boolean = this == Void
-    def str: SString = this.toString()
 
-    def assignable(dt: DataType): Boolean = {
-        (this, dt) match {
-            case (Void, _) | (_, Void) => false // cannot assign void or be assigned void
-            case (`dt`, _) => true
-            case (Any, _) | (_, Any) => true    // any always compatible
-            case default   => false
-        }
-    }
+    def str: SString = this.toString()
 }
 
 enum Data {
-    case Number(v: Double)
-    case String(v: SString)
-    case Array (v: ArrayBuffer[Data])
-    case Object(v: HashMap[Data, Data])
+    case Number(var v: Double)
+    case String(var v: SString)
+    case Array (var v: ArrayBuffer[Data])
+    case Object(var v: HashMap[Data, Data])
+    case Type  (var v: DataType)
 
     def get_type(): DataType = {
         this match {
@@ -70,6 +87,18 @@ enum Data {
             case Data.String(x) => DataType.String
             case Data.Array(x)  => DataType.Array
             case Data.Object(x) => DataType.Object
+            case Data.Type(x)   => DataType.Type
+        }
+    }
+
+    def matches(that: Data): Boolean = {
+        (this, that) match {
+            case (_, Data.Type(DataType.Any))     => true
+            case (Data.Type(a), Data.Type(b))     => a == b
+            case (_, Data.Type(b))                => this.get_type() == b
+            case (Data.Array(a), Data.Array(b))   => a.size == b.size && a.zip(b).forall(p => p._1.matches(p._2))
+            case (Data.Object(a), Data.Object(b)) => a.size == b.size && a.forall(ent => b.contains(ent._1) && ent._2.matches(b(ent._1)))
+            case _                                => this == that
         }
     }
 
@@ -88,7 +117,7 @@ enum Data {
         (this, idx) match {
             case (Array(v),  Number(i)) => v(i.toInt) = x
             case (Object(v), _)         => v(idx) = x
-            case default => println("shit!"); this
+            case _ => throw Exception("Run-time Error: Invalid = operation.")
         }
     }
 
@@ -96,13 +125,35 @@ enum Data {
 
     def +=(op2: Data): Unit = {
         (this, op2) match {
+            case (v1: Number, v2: Number) => v1.v += v2.v
             case (String(v1), String(v2)) => v1 ++: v2
             case (String(v1), Number(v2)) => v1 ++: v2.toString()
             case (Array(v1),  Array(v2) ) => v1.appendAll(v2)
             case (Array(v1),  _)          => v1.append(op2)
             case (Object(v1), Object(v2)) => v1 ++= v2
             case (Object(v1), Array(v2) ) => v1(v2(0)) = v2(1)
-            case default => println("shit!")
+            case _ => throw Exception("Operation Error: Invalid += operation.")
+        }
+    }
+
+    def -=(op2: Data): Unit = {
+        (this, op2) match {
+            case (v1: Number, v2: Number) => v1.v -= v2.v
+            case _ => throw Exception("Operation Error: Invalid -= operation.")
+        }
+    }
+
+    def *=(op2: Data): Unit = {
+        (this, op2) match {
+            case (v1: Number, v2: Number) => v1.v *= v2.v
+            case _ => throw Exception("Operation Error: Invalid *= operation.")
+        }
+    }
+
+    def /=(op2: Data): Unit = {
+        (this, op2) match {
+            case (v1: Number, v2: Number) => v1.v /= v2.v
+            case _ => throw Exception("Operation Error: Invalid /= operation.")
         }
     }
 
@@ -112,7 +163,8 @@ enum Data {
             case (String(v1), String(v2)) => String(v1 + v2)
             case (Array(v1),  Array(v2) ) => Array(v1 ++ v2)
             case (Object(v1), Object(v2)) => Object(v1 ++ v2)
-            
+            case (Type(v1),   Type(v2)  ) => Type(v1 + v2)
+
             case (Object(v1), Array(v2))  => {
                 val res = v1.clone()
                 res(v2(0)) = v2(1)
@@ -127,47 +179,47 @@ enum Data {
             case (String(v1), Object(v2)) => String(v1 + v2.toString())
             case (String(v1), Array(v2))  => String(v1 + v2.toString())
 
-            case default => println("shit!"); this
+            case _ => throw Exception("Run-time Error: Invalid + operation.")
         }
     }
 
     def -(op2: Data): Data = {
         (this, op2) match {
             case (Number(v1), Number(v2)) => Number(v1 - v2)
-            case default => println("shit!"); this
+            case _ => throw Exception("Run-time Error: Invalid - operation.")
         }
     }
 
     def *(op2: Data): Data = {
         (this, op2) match {
             case (Number(v1), Number(v2)) => Number(v1 * v2)
-            case default => println("shit!"); this
+            case _ => throw Exception("Run-time Error: Invalid * operation.")
         }
     }
 
     def /(op2: Data): Data = {
         (this, op2) match {
             case (Number(v1), Number(v2)) => Number(v1 / v2)
-            case default => println("shit!"); this
+            case _ => throw Exception("Run-time Error: Invalid / operation.")
         }
     }
 
     // COMPARISON
 
-    def ==(op2: Data): Data = _from_antibool(_equals(op2))
-    def !=(op2: Data): Data = _from_antibool(_equals(op2))
-    def  <(op2: Data): Data = _from_bool(_less_than(op2))
-    def >=(op2: Data): Data = _from_antibool(_less_than(op2))
-    def <=(op2: Data): Data = _from_bool(_less_than(op2) || _equals(op2))
-    def  >(op2: Data): Data = _from_antibool(_less_than(op2) || _equals(op2))
+    def ==(op2: Data): Data.Number = _from_bool(_equals(op2))
+    def !=(op2: Data): Data.Number = _from_antibool(_equals(op2))
+    def  <(op2: Data): Data.Number = _from_bool(_less_than(op2))
+    def >=(op2: Data): Data.Number = _from_antibool(_less_than(op2))
+    def <=(op2: Data): Data.Number = _from_bool(_less_than(op2) || _equals(op2))
+    def  >(op2: Data): Data.Number = _from_antibool(_less_than(op2) || _equals(op2))
 
     // HELPERS
 
-    def _from_bool(b: Boolean): Data = {
+    def _from_bool(b: Boolean): Data.Number = {
         Data.Number(if (b) 1 else 0)
     }
 
-    def _from_antibool(b: Boolean): Data = {
+    def _from_antibool(b: Boolean): Data.Number = {
         Data.Number(if (b) 0 else 1)
     }
 
@@ -175,9 +227,7 @@ enum Data {
         (this, op2) match {
             case (Number(v1), Number(v2)) => v1 < v2
             case (String(v1), String(v2)) => v1 < v2
-            case (Array(v1),  Array(v2) ) => v1.length < v2.length
-            case (Object(v1), Object(v2)) => v1.size < v2.size
-            case default => println("shit!"); false
+            case _ => throw Exception("Run-time Error: Invalid inequality comparison operation.")
         }
     }
 
@@ -187,16 +237,18 @@ enum Data {
             case (String(v1), String(v2)) => v1 == v2
             case (Array(v1),  Array(v2) ) => v1.sameElements(v2)
             case (Object(v1), Object(v2)) => v1.equals(v2)
-            case default => println("shit!"); false
+            case (Type(v1),   Type(v2)  ) => v1 == v2
+            case _ => throw Exception("Run-time Error: Invalid equality comparison operation.")
         }
     }
 
-    def _is_truthy = {
+    def _is_truthy: Boolean = {
         this match {
             case Number(v) => v != 0
             case Array(v)  => v.length != 0
             case Object(v) => v.size != 0
             case String(v) => v.length() != 0
+            case Type(v)   => v != DataType.Void
         }
     }
 }

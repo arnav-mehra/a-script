@@ -4,124 +4,77 @@ import types.util.*
 import types.data.*
 
 object Ops {
-    def plus_eq(var_type: DataType, expr_type: DataType, var_offset: Int, expr: Ast) = {
-        (var_type, expr_type) match {
-            case (DataType.Number, DataType.Number) => (
-                () => {
-                    val Data.Number(n1) = Env.get_var(var_offset): @unchecked
-                    val Data.Number(n2) = expr(): @unchecked
-                    val new_val = Data.Number(n1 + n2)
-                    Env.set_var(var_offset, new_val)
-                    new_val
-                }
-            )
-            case (DataType.String, DataType.Number) => (
-                () => {
-                    val Data.String(n1) = Env.get_var(var_offset): @unchecked
-                    val Data.Number(n2) = expr(): @unchecked
-                    val new_val = Data.String(n1 ++: n2.toString())
-                    Env.set_var(var_offset, new_val)
-                    new_val
-                }
-            )
-            case default => (
-                () => {
-                    val v = expr()
-                    Env.get_var(var_offset) += v
-                    Env.get_var(var_offset)
-                }
-            )
-        }
+    def bin_fn[A <: Data, B <: Data](op: String) = op match {
+        case "+"  => (a: A, b: B) => a + b
+        case "-"  => (a: A, b: B) => a - b
+        case "*"  => (a: A, b: B) => a * b
+        case "/"  => (a: A, b: B) => a / b
+
+        case "<"  => (a: A, b: B) => a < b
+        case ">"  => (a: A, b: B) => a > b
+        case ">=" => (a: A, b: B) => a >= b
+        case "<=" => (a: A, b: B) => a <= b
+        case "==" => (a: A, b: B) => a == b
+        case "!=" => (a: A, b: B) => a != b
+
+        case "+=" => (a: A, b: B) => a += b; a
+        case "-=" => (a: A, b: B) => a -= b; a
+        case "*=" => (a: A, b: B) => a *= b; a
+        case "/=" => (a: A, b: B) => a /= b; a
     }
 
-    def binop(op: String, e1t: DataType, e2t: DataType, e1: Ast, e2: Ast) = {
-        (op, e1t, e2t) match {
-            case ("<"|">"|">="|"<="|"=="|"!=", _, _)  => {
-                cmpop(op, e1t, e2t, e1, e2)
-            }
-            case (_, DataType.Number, DataType.Number) => {
-                numop(op, e1, e2)
-            }
-            case ("+", DataType.Array, DataType.Array) => {
-                () => {
-                    val Data.Array(a1) = e1(): @unchecked
-                    val Data.Array(a2) = e2(): @unchecked
-                    Data.Array(a1 ++ a2)
-                }
-            }
-            case ("+", DataType.Array, _) => {
-                () => {
-                    val Data.Array(a1) = e1(): @unchecked
-                    Data.Array(a1.appended(e2()))
-                }
-            }
-            case ("+", _, _) => {
-                () => e1() + e2()
-            }
-            case default => {
-                throw Exception("Compile-time error. Unimplemented binary operation.")
-                () => Data.Number(0)
-            }
-        }
-    }
-
-    def cmpop(op: String, e1t: DataType, e2t: DataType, e1: Ast, e2: Ast) = {
-        val cmp_fn = op match {
-            case "<"  => (a: Double, b: Double) => a < b
-            case ">"  => (a: Double, b: Double) => a > b
-            case ">=" => (a: Double, b: Double) => a >= b
-            case "<=" => (a: Double, b: Double) => a <= b
-            case "==" => (a: Double, b: Double) => a == b
-            case "!=" => (a: Double, b: Double) => a != b
-        }
-
-        (e1t, e2t) match {
-            case (DataType.Number, DataType.Number) => (
-                () => {
-                    val Data.Number(n1) = e1(): @unchecked
-                    val Data.Number(n2) = e2(): @unchecked
-                    Data.Number(if (cmp_fn(n1, n2)) 1 else 0)
-                }
-            )
-            case (DataType.String, DataType.String) => (
-                () => {
-                    val Data.String(s1) = e1(): @unchecked
-                    val Data.String(s2) = e2(): @unchecked
-                    Data.Number(if (cmp_fn(s1.length, s2.length)) 1 else 0)
-                }
-            )
-            case (DataType.Array, DataType.Array) => (
-                () => {
-                    val Data.Array(a1) = e1(): @unchecked
-                    val Data.Array(a2) = e2(): @unchecked
-                    Data.Number(if (cmp_fn(a1.length, a2.length)) 1 else 0)
-                }
-            )
-            case (DataType.Object, DataType.Object) => (
-                () => {
-                    val Data.Object(o1) = e1(): @unchecked
-                    val Data.Object(o2) = e2(): @unchecked
-                    Data.Number(if (cmp_fn(o1.size, o2.size)) 1 else 0)
-                }
-            )
-            case default => (
-                () => Data.Number(0)
-            )
-        }
-    }
-
-    def numop(op: String, e1: Ast, e2: Ast) = {
-        val op_fn = op match {
-            case "-" => (a: Double, b: Double) => a - b
-            case "+" => (a: Double, b: Double) => a + b
-            case "*" => (a: Double, b: Double) => a * b
-            case "/" => (a: Double, b: Double) => a / b
-        }
-
+    def bin_apply[A <: Data, B <: Data](op: String, e1: Ast, e2: Ast) = {
+        val fn = bin_fn[A, B](op)
         () => {
-            val Data.Number(n1) = e1(): @unchecked
-            val Data.Number(n2) = e2(): @unchecked
-            Data.Number(op_fn(n1, n2))
+            val a1 = e1().asInstanceOf[A]
+            val a2 = e2().asInstanceOf[B]
+            fn(a1, a2)
+        }
+    }
+
+    def bin_op(op: String, e1t: DataType, e2t: DataType, e1: Ast, e2: Ast) = {
+        (e1t, e2t) match {
+            case (DataType.Number, DataType.Number) => bin_apply[Data.Number, Data.Number](op, e1, e2)
+            case (DataType.Number, DataType.String) => bin_apply[Data.Number, Data.String](op, e1, e2)
+            case (DataType.Number, DataType.Array ) => bin_apply[Data.Number, Data.Array ](op, e1, e2)
+            case (DataType.Number, DataType.Object) => bin_apply[Data.Number, Data.Object](op, e1, e2)
+            case (DataType.Number, DataType.Type  ) => bin_apply[Data.Number, Data.Type  ](op, e1, e2)
+            case (DataType.Number, _              ) => bin_apply[Data.Number, Data](op, e1, e2)
+
+            case (DataType.String, DataType.Number) => bin_apply[Data.String, Data.Number](op, e1, e2)
+            case (DataType.String, DataType.String) => bin_apply[Data.String, Data.String](op, e1, e2)
+            case (DataType.String, DataType.Array ) => bin_apply[Data.String, Data.Array ](op, e1, e2)
+            case (DataType.String, DataType.Object) => bin_apply[Data.String, Data.Object](op, e1, e2)
+            case (DataType.String, DataType.Type  ) => bin_apply[Data.String, Data.Type  ](op, e1, e2)
+            case (DataType.String, _              ) => bin_apply[Data.String, Data](op, e1, e2)
+
+            case (DataType.Array, DataType.Number) => bin_apply[Data.Array, Data.Number](op, e1, e2)
+            case (DataType.Array, DataType.String) => bin_apply[Data.Array, Data.String](op, e1, e2)
+            case (DataType.Array, DataType.Array ) => bin_apply[Data.Array, Data.Array ](op, e1, e2)
+            case (DataType.Array, DataType.Object) => bin_apply[Data.Array, Data.Object](op, e1, e2)
+            case (DataType.Array, DataType.Type  ) => bin_apply[Data.Array, Data.Type  ](op, e1, e2)
+            case (DataType.Array, _              ) => bin_apply[Data.Array, Data](op, e1, e2)
+
+            case (DataType.Object, DataType.Number) => bin_apply[Data.Object, Data.Number](op, e1, e2)
+            case (DataType.Object, DataType.String) => bin_apply[Data.Object, Data.String](op, e1, e2)
+            case (DataType.Object, DataType.Array ) => bin_apply[Data.Object, Data.Array ](op, e1, e2)
+            case (DataType.Object, DataType.Object) => bin_apply[Data.Object, Data.Object](op, e1, e2)
+            case (DataType.Object, DataType.Type  ) => bin_apply[Data.Object, Data.Type  ](op, e1, e2)
+            case (DataType.Object, _              ) => bin_apply[Data.Object, Data](op, e1, e2)
+
+            case (DataType.Type, DataType.Number) => bin_apply[Data.Type, Data.Number](op, e1, e2)
+            case (DataType.Type, DataType.String) => bin_apply[Data.Type, Data.String](op, e1, e2)
+            case (DataType.Type, DataType.Array ) => bin_apply[Data.Type, Data.Array ](op, e1, e2)
+            case (DataType.Type, DataType.Object) => bin_apply[Data.Type, Data.Object](op, e1, e2)
+            case (DataType.Type, DataType.Type  ) => bin_apply[Data.Type, Data.Type  ](op, e1, e2)
+            case (DataType.Type, _              ) => bin_apply[Data.Type, Data](op, e1, e2)
+
+            case (_, DataType.Number) => bin_apply[Data, Data.Number](op, e1, e2)
+            case (_, DataType.String) => bin_apply[Data, Data.String](op, e1, e2)
+            case (_, DataType.Array ) => bin_apply[Data, Data.Array ](op, e1, e2)
+            case (_, DataType.Object) => bin_apply[Data, Data.Object](op, e1, e2)
+            case (_, DataType.Type  ) => bin_apply[Data, Data.Type  ](op, e1, e2)
+            case (_, _              ) => bin_apply[Data, Data](op, e1, e2)
         }
     }
 }

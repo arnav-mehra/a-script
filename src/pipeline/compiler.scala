@@ -63,6 +63,10 @@ class Compiler(caller: Node) {
 
     def gen_ast(bn: Node): Ast = {
         bn match {
+            case Node.Call("type", arg_nodes) => {
+                val arg_asts = gen_ast_list(arg_nodes)
+                () => Data.Type(arg_asts(0)().get_type())
+            }
             case Node.Call(_, arg_nodes) => {
                 val arg_asts = gen_ast_list(arg_nodes)
                 val stack_shift = fn.vars.size
@@ -91,35 +95,17 @@ class Compiler(caller: Node) {
                     field_asts.foldLeft(v)((acc, field_ast) => acc -> field_ast())
                 }
             }
-            case Node.Set(getter, op, expr_node) => {
+            case Node.Set(getter, "=", expr_node) => {
                 val expr_ast = gen_ast(expr_node)
                 val var_offset = fn.get_var(getter.v)
                 val field_asts = gen_ast_list(getter.fs)
 
-                val new_val_fn = op match {
-                    case "="  => (lhs: Data, rhs: Data) => rhs
-                    case "+=" => (lhs: Data, rhs: Data) => lhs + rhs
-                    case "-=" => (lhs: Data, rhs: Data) => lhs - rhs
-                    case "*=" => (lhs: Data, rhs: Data) => lhs * rhs
-                    case "/=" => (lhs: Data, rhs: Data) => lhs / rhs
-                }
-
                 field_asts.length match {
                     case 0 => {
-                        op match {
-                            case "+=" => {
-                                val expr_type = call.node_types.get(expr_node)
-                                val var_type = call.var_types(getter.v)
-                                Ops.plus_eq(var_type, expr_type, var_offset, expr_ast)
-                            }
-                            case _ => {
-                                () => {
-                                    val lhs_val = Env.get_var(var_offset)
-                                    val rhs_val = expr_ast()
-                                    val new_val = new_val_fn(lhs_val, rhs_val)
-                                    Env.set_var(var_offset, new_val)
-                                }
-                            }
+                        () => {
+                            val lhs_val = Env.get_var(var_offset)
+                            val rhs_val = expr_ast()
+                            Env.set_var(var_offset, rhs_val)
                         }
                     }
                     case _ => {
@@ -133,19 +119,25 @@ class Compiler(caller: Node) {
 
                             val lhs_val = modified_val -> last_field
                             val rhs_val = expr_ast()
-                            val new_val = new_val_fn(lhs_val, rhs_val)
-                            modified_val.set(last_field, new_val)
-                            new_val
+                            modified_val.set(last_field, rhs_val)
+                            rhs_val
                         }
                     }
                 }
+            }
+            case Node.Set(e1_bn, op, e2_bn) => {
+                val e1: Ast = gen_ast(e1_bn)
+                val e2: Ast = gen_ast(e2_bn)
+                val e1t: DataType = call.node_types.get(e1_bn)
+                val e2t: DataType = call.node_types.get(e2_bn)
+                Ops.bin_op(op, e1t, e2t, e1, e2)
             }
             case Node.BinOp(e1_bn, op, e2_bn) => {
                 val e1: Ast = gen_ast(e1_bn)
                 val e2: Ast = gen_ast(e2_bn)
                 val e1t: DataType = call.node_types.get(e1_bn)
                 val e2t: DataType = call.node_types.get(e2_bn)
-                Ops.binop(op, e1t, e2t, e1, e2)
+                Ops.bin_op(op, e1t, e2t, e1, e2)
             }
             case Node.Block(nodes) => {
                 val block_asts = gen_ast_list(nodes)
@@ -156,7 +148,7 @@ class Compiler(caller: Node) {
                 val cb_ls: ArrayBuffer[(Ast, Ast)] = ls.map(p => (gen_ast(p._1), gen_ast(p._2)))
                 () => {
                     val v: Data = s()
-                    val res = cb_ls.find((c, b) => v == c())
+                    val res = cb_ls.find((c, b) => v.matches(c()))
                     res match {
                         case Some(_: Ast, ast: Ast) => ast()
                         case None => Data.Number(0)
@@ -179,10 +171,16 @@ class Compiler(caller: Node) {
                     val varr: Data = e()
                     varr match {
                         case Data.Array(arr) => {
-                            for (x <- arr) {
+                            arr.foreach(x => {
                                 Env.set_var(vi, x)
                                 b()
-                            }
+                            })
+                        }
+                        case Data.Object(obj) => {
+                            obj.foreachEntry((k, v) => {
+                                Env.set_var(vi, Data.Array(ArrayBuffer(k, v)))
+                                b()
+                            })
                         }
                         case _ => {
                             throw Exception("Type Error: Cannot iterate over non-array values.")

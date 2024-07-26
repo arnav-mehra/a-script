@@ -30,8 +30,8 @@ object ProgramParser extends JavaTokenParsers {
         | for_block
         | match_block
 
-    def function_block:Parser[Node] = "fn~" ~ variable ~ param_list ~ block_core ^^ {
-        case "fn~"~v~ps~b => Node.Fn(v, ps, b)
+    def function_block:Parser[Node] = "fn" ~ variable ~ param_list ~ block_core ^^ {
+        case "fn"~v~ps~b => Node.Fn(v, ps, b)
     }
 
     def param_list: Parser[ArrayBuffer[String]] = 
@@ -41,21 +41,21 @@ object ProgramParser extends JavaTokenParsers {
             case _ => throw Exception("Parsing Error: Invalid parameter list.")
         }
 
-    def while_block:Parser[Node.While] = "while~" ~ statement ~ block_core ^^ {
-        case "while~"~c~bt => Node.While(c, bt)
+    def while_block:Parser[Node.While] = "while" ~ statement ~ block_core ^^ {
+        case "while"~c~bt => Node.While(c, bt)
         case _ => throw Exception("Parsing Error: Invalid while loop.")
     }
 
-    def match_block:Parser[Node.Match] = "match~" ~ statement ~ "{" ~ rep(match_case) ~ "}" ^^ {
-        case "match~"~s~"{"~ls~"}" => Node.Match(s, ls.to(ArrayBuffer))
+    def match_block:Parser[Node.Match] = "match" ~ statement ~ "{" ~ rep(match_case) ~ "}" ^^ {
+        case "match"~s~"{"~ls~"}" => Node.Match(s, ls.to(ArrayBuffer))
         case _ => throw Exception("Parsing Error: Invalid match statement.")
     }
 
-    def match_case:Parser[(Node, Node)] = statement ~ "=>" ~ (block_core | statement) ^^ (
+    def match_case:Parser[(Node, Node)] = statement ~ "->" ~ (block_core | statement) ^^ (
         s => (s._1._1, s._2)
     )
 
-    def for_block:Parser[Node] = "for~" ~ (for_in_block | for_to_block) ^^ (
+    def for_block:Parser[Node] = "for" ~ (for_in_block | for_to_block) ^^ (
         s => s._2
     )
 
@@ -64,8 +64,8 @@ object ProgramParser extends JavaTokenParsers {
         case _ => throw Exception("Parsing Error: Invalid for in block.")
     }
 
-    def for_to_block:Parser[Node.ForTo] = variable ~ ":" ~ statement ~ "~to~" ~ statement ~ block_core ^^ {
-        case v~":"~s~"~to~"~e~bt => Node.ForTo(v, s, e, bt)
+    def for_to_block:Parser[Node.ForTo] = variable ~ ":" ~ statement ~ "to" ~ statement ~ block_core ^^ {
+        case v~":"~s~"to"~e~bt => Node.ForTo(v, s, e, bt)
         case _ => throw Exception("Parsing Error: Invalid for to block.")
     }
 
@@ -107,7 +107,6 @@ object ProgramParser extends JavaTokenParsers {
     def factor:Parser[Node] =
         "(" ~ setter ~ ")" ^^ (s => s._1._2)
         | match_block
-        // | if_block
         | literal          ^^ (x => Node.Const(x))
         | caller
         | accessor
@@ -132,7 +131,15 @@ object ProgramParser extends JavaTokenParsers {
 
     // LITERALS
 
-    def literal: Parser[Data] = number | array | string | obj
+    def literal: Parser[Data] = datatype | number | array | string | obj
+
+    def datatype: Parser[Data] = 
+          "NUMBER" ^^ (_ => Data.Type(DataType.Number))
+        | "STRING" ^^ (_ => Data.Type(DataType.String))
+        | "ARRAY"  ^^ (_ => Data.Type(DataType.Array))
+        | "OBJECT" ^^ (_ => Data.Type(DataType.Object))
+        | "TYPE"   ^^ (_ => Data.Type(DataType.Type))
+        | "ANY"    ^^ (_ => Data.Type(DataType.Any))
 
     def number: Parser[Data.Number] = hex | binary | decimal
 
@@ -172,9 +179,6 @@ object ProgramParser extends JavaTokenParsers {
 
     def obj_ent: Parser[(Data, Data)] = literal ~ ":" ~ literal ^^ {
         case l1~":"~l2 => (l1, l2)
-        case default => {
-            throw new java.lang.Exception("Error parsing object entry (this shouldn't happen)");
-            (Data.Number(0), Data.Number(0))
-        }
+        case _ => throw Exception("Parsing Error: Invalid object entry.");
     }
 }

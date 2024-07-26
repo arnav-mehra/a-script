@@ -29,14 +29,14 @@ class Typer(caller: Node.Call) {
         gen_node_type(fn.bt)
     }
 
-    def iter_nodes(bt: Nodes): Unit = {
-        bt.foreach(gen_node_type)
-    }
-
     def gen_node_type(bn: Node): DataType = {
         val tp: DataType = bn match {
             case Node.Fn(fn, ps, bt) => {
                 DataType.Void // fn declaration doesnt return anything.
+            }
+            case bn_call: Node.Call if bn_call.f == "type" => {
+                val pt: ArrayBuffer[DataType] = bn_call.bt.map(gen_node_type)
+                DataType.Type
             }
             case bn_call: Node.Call => {
                 val pt: ArrayBuffer[DataType] = bn_call.bt.map(gen_node_type)
@@ -53,7 +53,7 @@ class Typer(caller: Node.Call) {
                 call.get_var_type(v)
             }
             case Node.Get(v, fs_bt) => {
-                iter_nodes(fs_bt)
+                fs_bt.foreach(gen_node_type)
                 DataType.Any
             }
             case Node.Set(getter, op, e_bn) => {
@@ -70,9 +70,11 @@ class Typer(caller: Node.Call) {
             }
             case Node.Match(c_bn, ls) => {
                 val c = gen_node_type(c_bn)
-                ls.map(_._1).foreach(gen_node_type)
-                ls.map(_._2).foreach(gen_node_type)
-                DataType.Any
+                val ret_types = ls.map(p => (gen_node_type(p._1), gen_node_type(p._2))).map(_._2)
+                (ret_types.forall(_ == ret_types.head)) match {
+                    case true  => ret_types.head
+                    case false => DataType.Any
+                }
             }
             case Node.While(c_bn, block) => {
                 val c = gen_node_type(c_bn)
@@ -80,23 +82,26 @@ class Typer(caller: Node.Call) {
                 DataType.Void
             }
             case Node.ForIn(v, e_bn, block) => {
-                call.add_var_type(v, DataType.Any)
                 val e = gen_node_type(e_bn)
-                if (!e.is_iterable) println("Cannot iterate over type " + e.str)
+                if (!e.is_iterable) throw Error("Type Error: Cannot iterate over type " + e.str + ".")
+                call.add_var_type(v, DataType.Any)
                 gen_node_type(block)
                 DataType.Void
             }
             case Node.ForTo(v, e1_bn, e2_bn, block) => {
-                call.add_var_type(v, DataType.Number)
                 val e1 = gen_node_type(e1_bn)
+                if (e1 != DataType.Number && e1 != DataType.Any) throw Error("Type Error: Cannot iterate from type " + e1.str + ".")
                 val e2 = gen_node_type(e2_bn)
+                if (e2 != DataType.Number && e2 != DataType.Any) throw Error("Type Error: Cannot iterate to type " + e2.str + ".")
+                call.add_var_type(v, DataType.Number)
                 gen_node_type(block)
                 DataType.Void
             }
+            case Node.Block(lines) if lines.length == 0 => {
+                DataType.Void
+            }
             case Node.Block(lines) => {
-                val (bt_ls, bt_ret) = lines.splitAt(lines.length - 1)
-                iter_nodes(bt_ls)
-                gen_node_type(bt_ret(0))
+                lines.map(gen_node_type).last
             }
         }
 

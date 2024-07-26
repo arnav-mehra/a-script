@@ -59,10 +59,10 @@ class Call(
     }
 
     def add_var_type(s: String, dt: DataType) = {
-        if (var_types.contains(s) && var_types(s).assignable(dt)) {
-            println("Cannot reassign " + s + " to type " + dt.str);
+        var_types(s) = var_types.contains(s) && var_types(s) != dt match {
+            case true  => DataType.Any
+            case false => dt
         }
-        var_types(s) = dt
     }
 
     def get_var_type(s: String) = {
