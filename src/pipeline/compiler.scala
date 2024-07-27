@@ -143,15 +143,22 @@ class Compiler(caller: Node) {
                 val block_asts = gen_ast_list(nodes)
                 () => block_asts.map(ast => ast()).last
             }
-            case Node.Match(s_bn, ls) => {
-                val s: Ast = gen_ast(s_bn)
-                val cb_ls: ArrayBuffer[(Ast, Ast)] = ls.map(p => (gen_ast(p._1), gen_ast(p._2)))
+            case node: Node.Match => {
+                val val_ast: Ast = gen_ast(node.v)
+                val case_block_asts: ArrayBuffer[(Ast, Ast)] = node.c_ls.map(p => (gen_ast(p._1), gen_ast(p._2)))
+                val default_val: Data = call.node_types.get(node) match {
+                    case DataType.Number => Data.Number(0)
+                    case DataType.String => Data.String("")
+                    case DataType.Array  => Data.Array(ArrayBuffer())
+                    case DataType.Object => Data.Object(HashMap())
+                    case other_type      => Data.Type(other_type)
+                }
                 () => {
-                    val v: Data = s()
-                    val res = cb_ls.find((c, b) => v.matches(c()))
+                    val v: Data = val_ast()
+                    val res = case_block_asts.find((c, b) => v.matches(c()))
                     res match {
                         case Some(_: Ast, ast: Ast) => ast()
-                        case None => Data.Number(0)
+                        case None => default_val
                     }
                 }
             }

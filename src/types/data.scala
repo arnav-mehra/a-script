@@ -109,7 +109,7 @@ enum Data {
             case (Array(v),  Number(i)) => v(i.toInt) 
             case (String(v), Number(i)) => String(v.charAt(i.toInt).toString())
             case (Object(v), _)         => v(idx)
-            case default => println("shit!"); this
+            case default => throw Exception("Run-time Error: Invalid indexing operation.")
         }
     }
 

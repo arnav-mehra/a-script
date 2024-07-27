@@ -59,7 +59,8 @@ class Call(
     }
 
     def add_var_type(s: String, dt: DataType) = {
-        var_types(s) = var_types.contains(s) && var_types(s) != dt match {
+        val type_change = var_types.contains(s) && var_types(s) != dt
+        var_types(s) = type_change match {
             case true  => DataType.Any
             case false => dt
         }
