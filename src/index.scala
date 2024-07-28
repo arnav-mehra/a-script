@@ -3,7 +3,7 @@ package index
 import pipeline.runner.*
 
 object Index {
-    def EXT = "asc"
+    def EXT = ".asc"
 
     def main(args: Array[String]) = {
         if (args.length == 0) {

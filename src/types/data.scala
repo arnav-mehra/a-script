@@ -62,6 +62,14 @@ enum DataType {
         }
     }
 
+    def default_val: Data = this match {
+        case DataType.Number => Data.Number(0)
+        case DataType.String => Data.String("")
+        case DataType.Array  => Data.Array(ArrayBuffer())
+        case DataType.Object => Data.Object(HashMap())
+        case other_type      => Data.Type(other_type)
+    }
+
     def is_iterable: Boolean = {
         this match {
             case Any | Array | Object => true
@@ -109,7 +117,7 @@ enum Data {
             case (Array(v),  Number(i)) => v(i.toInt) 
             case (String(v), Number(i)) => String(v.charAt(i.toInt).toString())
             case (Object(v), _)         => v(idx)
-            case default => throw Exception("Run-time Error: Invalid indexing operation.")
+            case _ => throw Exception("Run-time Error: Invalid indexing operation.")
         }
     }
 

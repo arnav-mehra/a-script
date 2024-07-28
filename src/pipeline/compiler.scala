@@ -146,13 +146,7 @@ class Compiler(caller: Node) {
             case node: Node.Match => {
                 val val_ast: Ast = gen_ast(node.v)
                 val case_block_asts: ArrayBuffer[(Ast, Ast)] = node.c_ls.map(p => (gen_ast(p._1), gen_ast(p._2)))
-                val default_val: Data = call.node_types.get(node) match {
-                    case DataType.Number => Data.Number(0)
-                    case DataType.String => Data.String("")
-                    case DataType.Array  => Data.Array(ArrayBuffer())
-                    case DataType.Object => Data.Object(HashMap())
-                    case other_type      => Data.Type(other_type)
-                }
+                val default_val: Data = call.node_types.get(node).default_val
                 () => {
                     val v: Data = val_ast()
                     val res = case_block_asts.find((c, b) => v.matches(c()))

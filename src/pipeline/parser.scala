@@ -99,8 +99,13 @@ object ProgramParser extends JavaTokenParsers {
         case e1~lst => nestBinOps(e1, lst)
     }
 
-    def printable_factor:Parser[Node] = factor ~ opt("!") ^^ {
+    def printable_factor:Parser[Node] = inline_callable_factor ~ opt("!") ^^ {
         case f~Some(x) => Node.Print(f)
+        case f~None => f
+    }
+
+    def inline_callable_factor:Parser[Node] = factor ~ opt("." ~ caller) ^^ {
+        case f~Some("."~caller) => Node.Call(caller.f, ArrayBuffer(f) ++ caller.bt)
         case f~None => f
     }
 
@@ -119,8 +124,8 @@ object ProgramParser extends JavaTokenParsers {
 
     def field:Parser[Node] = "[" ~ getter ~ "]" ^^ (s => s._1._2)
 
-    def caller: Parser[Node.Call] = variable ~ "(" ~ arg_list ~ ")" ^^ {
-        case v~"("~bt~")" => Node.Call(v, bt)
+    def caller:Parser[Node.Call] = variable ~ "(" ~ arg_list ~ ")" ^^ {
+        case variable~"("~arg_list~")" => Node.Call(variable, arg_list)
     }
 
     def arg_list: Parser[ArrayBuffer[Node]] =
