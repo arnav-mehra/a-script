@@ -220,6 +220,8 @@ enum Data {
     def >=(op2: Data): Data.Number = _from_antibool(_less_than(op2))
     def <=(op2: Data): Data.Number = _from_bool(_less_than(op2) || _equals(op2))
     def  >(op2: Data): Data.Number = _from_antibool(_less_than(op2) || _equals(op2))
+    def ~~(op2: Data): Data.Number = _from_bool(matches(op2))
+    def !~(op2: Data): Data.Number = _from_antibool(matches(op2))
 
     // HELPERS
 
@@ -246,7 +248,7 @@ enum Data {
             case (Array(v1),  Array(v2) ) => v1.sameElements(v2)
             case (Object(v1), Object(v2)) => v1.equals(v2)
             case (Type(v1),   Type(v2)  ) => v1 == v2
-            case _ => throw Exception("Run-time Error: Invalid equality comparison operation.")
+            case _ => false
         }
     }
 

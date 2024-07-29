@@ -16,6 +16,8 @@ object Ops {
         case "<=" => (a: A, b: B) => a <= b
         case "==" => (a: A, b: B) => a == b
         case "!=" => (a: A, b: B) => a != b
+        case "~~" => (a: A, b: B) => a.~~(b)
+        case "!~" => (a: A, b: B) => a.!~(b)
 
         case "+=" => (a: A, b: B) => a += b; a
         case "-=" => (a: A, b: B) => a -= b; a

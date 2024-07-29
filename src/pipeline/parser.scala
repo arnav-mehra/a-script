@@ -87,7 +87,7 @@ object ProgramParser extends JavaTokenParsers {
         lst.foldLeft(e1)((acc, t) => Node.BinOp(acc, t._1, t._2))
     }
 
-    def getter:Parser[Node] = expression ~ rep(("=="|"!="|"<="|">="|"<"|">") ~ expression) ^^ {
+    def getter:Parser[Node] = expression ~ rep(("!~"|"~~"|"=="|"!="|"<="|">="|"<"|">") ~ expression) ^^ {
         case e1~lst => nestBinOps(e1, lst)
     }
 
@@ -99,14 +99,15 @@ object ProgramParser extends JavaTokenParsers {
         case e1~lst => nestBinOps(e1, lst)
     }
 
-    def printable_factor:Parser[Node] = inline_callable_factor ~ opt("!") ^^ {
-        case f~Some(x) => Node.Print(f)
-        case f~None => f
+    def printable_factor:Parser[Node] = opt("@") ~ inline_callable_factor ^^ {
+        case Some(x)~f => Node.Print(f)
+        case None~f    => f
     }
 
     def inline_callable_factor:Parser[Node] = factor ~ opt("." ~ caller) ^^ {
         case f~Some("."~caller) => Node.Call(caller.f, ArrayBuffer(f) ++ caller.bt)
         case f~None => f
+        case _ => throw Exception("Parsing Error: Invalid inline call.")
     }
 
     def factor:Parser[Node] =

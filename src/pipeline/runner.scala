@@ -22,7 +22,7 @@ object Runner {
         Indexer.digest(root_fn)
         Typer.digest(root_caller)
 
-        // println(minimized_code); println()
+        println(minimized_code); println()
         // println(root_fn); println()
         // Functions.data.foreach((n, f) => {
         //     print(n + ": "); println(f.vars)
