@@ -67,6 +67,23 @@ class Compiler(caller: Node) {
                 val arg_asts = gen_ast_list(arg_nodes)
                 () => Data.Type(arg_asts(0)().get_type())
             }
+            case Node.Call("truthy", arg_nodes) => {
+                val arg_asts = gen_ast_list(arg_nodes)
+                () => Data.Number(if (arg_asts(0)().is_truthy()) 1 else 0)
+            }
+            case Node.Call("size", arg_nodes) => {
+                val arg_asts = gen_ast_list(arg_nodes)
+                () => {
+                    val v = arg_asts(0)()
+                    v match {
+                        case Data.Number(x) => v
+                        case Data.Array(x)  => Data.Number(x.size)
+                        case Data.Object(x) => Data.Number(x.size)
+                        case Data.String(x) => Data.Number(x.size)
+                        case _              => Data.Number(0)
+                    }
+                }
+            }
             case Node.Call(_, arg_nodes) => {
                 val arg_asts = gen_ast_list(arg_nodes)
                 val stack_shift = fn.vars.size
@@ -139,6 +156,9 @@ class Compiler(caller: Node) {
                 val e2t: DataType = call.node_types.get(e2_bn)
                 Ops.bin_op(op, e1t, e2t, e1, e2)
             }
+            case Node.Block(nodes) if nodes.length == 0 => {
+                () => Data.Null()
+            }
             case Node.Block(nodes) => {
                 val block_asts = gen_ast_list(nodes)
                 () => block_asts.map(ast => ast()).last
@@ -160,8 +180,8 @@ class Compiler(caller: Node) {
                 val c = gen_ast(c_bn)
                 val b = gen_ast(bt)
                 () => {
-                    while (c()._is_truthy) b()
-                    Data.Number(0)
+                    while (c() == Data.Number(1)) b()
+                    Data.Null()
                 }
             }
             case Node.ForIn(v, e_bn, bt) => {
@@ -187,7 +207,7 @@ class Compiler(caller: Node) {
                             throw Exception("Type Error: Cannot iterate over non-array values.")
                         }
                     }
-                    varr
+                    Data.Null()
                 }
             }
             case Node.ForTo(v, e1_bn, e2_bn, bt) => {
@@ -202,11 +222,11 @@ class Compiler(caller: Node) {
                         Env.set_var(vi, Data.Number(x))
                         b()
                     }
-                    Data.Number(0)
+                    Data.Null()
                 }
             }
             case Node.Fn(_, _, _) => {
-                () => Data.Number(0) // never executes, but makes scala happy.
+                () => Data.Null() // never executes, but makes scala happy.
             }
         }
     }

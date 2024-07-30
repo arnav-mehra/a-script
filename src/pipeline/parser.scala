@@ -4,16 +4,28 @@ import scala.util.parsing.combinator.JavaTokenParsers
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 
+import index.*
 import types.util.*
 import types.data.*
 
 object ProgramParser extends JavaTokenParsers {
-    def parse(code: String): (Node.Fn, Node.Call) = {
+    def parse(raw_code: String): (Node.Fn, Node.Call) = {
+        val code = remove_comments(raw_code)
+        // println(code); println()
         val t: Node.Block = parseAll(program, code).get
         (
             Node.Fn("_", ArrayBuffer(), t),
             Node.Call("_", ArrayBuffer())
         )
+    }
+
+    def remove_comments(code: String): String = {
+        code.split("\n")
+            .map(s => s.indexOf("//") match {
+                case -1 => s
+                case idx => s.subSequence(0, idx)
+            })
+            .mkString("\n")
     }
 
     def program:Parser[Node.Block] = rep(node) ^^ (
@@ -77,7 +89,16 @@ object ProgramParser extends JavaTokenParsers {
 
     def line:Parser[Node] = statement ~ ";" ^^ (s => s._1)
 
-    def statement:Parser[Node] = setter
+    def statement:Parser[Node] = imports|setter
+
+    def imports:Parser[Node] = "import" ~ file ^^ (s => s._2)
+
+    def file:Parser[Node] = raw"[-_/a-zA-Z0-9]+\.asc".r ^^ {
+        case path => {
+            val code = Index.read_file(path)
+            parse(code)._1.block
+        }
+    }
 
     def setter:Parser[Node] = rep(accessor ~ ("="|"+="|"-="|"*="|"/=")) ~ getter ^^ {
         case lst~e1 => lst.foldRight(e1)((v, acc) => Node.Set(v._1, v._2, acc))
@@ -146,6 +167,7 @@ object ProgramParser extends JavaTokenParsers {
         | "OBJECT" ^^ (_ => Data.Type(DataType.Object))
         | "TYPE"   ^^ (_ => Data.Type(DataType.Type))
         | "ANY"    ^^ (_ => Data.Type(DataType.Any))
+        | "VOID"   ^^ (_ => Data.Type(DataType.Void))
 
     def number: Parser[Data.Number] = hex | binary | decimal
 

@@ -88,6 +88,7 @@ enum Data {
     case Array (var v: ArrayBuffer[Data])
     case Object(var v: HashMap[Data, Data])
     case Type  (var v: DataType)
+    case Null  ()
 
     def get_type(): DataType = {
         this match {
@@ -96,6 +97,18 @@ enum Data {
             case Data.Array(x)  => DataType.Array
             case Data.Object(x) => DataType.Object
             case Data.Type(x)   => DataType.Type
+            case Data.Null()    => DataType.Void
+        }
+    }
+
+    def is_truthy(): Boolean = {
+        this match {
+            case Number(v) => v != 0
+            case Array(v)  => v.length != 0
+            case Object(v) => v.size != 0
+            case String(v) => v.length() != 0
+            case Type(v)   => v != DataType.Void
+            case Null()    => false
         }
     }
 
@@ -249,16 +262,6 @@ enum Data {
             case (Object(v1), Object(v2)) => v1.equals(v2)
             case (Type(v1),   Type(v2)  ) => v1 == v2
             case _ => false
-        }
-    }
-
-    def _is_truthy: Boolean = {
-        this match {
-            case Number(v) => v != 0
-            case Array(v)  => v.length != 0
-            case Object(v) => v.size != 0
-            case String(v) => v.length() != 0
-            case Type(v)   => v != DataType.Void
         }
     }
 }

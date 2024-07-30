@@ -8,21 +8,17 @@ import types.util.*
 import types.data.*
 
 import pipeline.parser.*
-import pipeline.minimizer.* 
 import pipeline.indexer.*
 import pipeline.typer.*
 import pipeline.compiler.*
 
 object Runner {
     def run(code: String): Unit = {
-        val minimized_code: String = Minimizer.digest(code)
-
-        val (root_fn: Node.Fn, root_caller: Node.Call) = ProgramParser.parse(minimized_code)
-
+        val (root_fn: Node.Fn, root_caller: Node.Call) = ProgramParser.parse(code)
         Indexer.digest(root_fn)
         Typer.digest(root_caller)
+        Compiler.digest(root_caller)()
 
-        println(minimized_code); println()
         // println(root_fn); println()
         // Functions.data.foreach((n, f) => {
         //     print(n + ": "); println(f.vars)
@@ -36,7 +32,5 @@ object Runner {
         //     c.node_types.forEach((a, b) => {println(a); println(b)})
         // })
         // println()
-
-        Compiler.digest(root_caller)()
     }
 }
